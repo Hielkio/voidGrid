@@ -1,10 +1,10 @@
 // Default configuration options
 const defaultOptions = {
-  numImages: 25,
+  numImages: 12,
   gap: '2rem',
   border: 'border-2 border-blue-500',
   sizeVariation: true,
-  minRowHeight: '200px',
+  // minRowHeight: '200px',
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -124,16 +124,17 @@ class PortfolioGrid {
     this.container.style.setProperty('--min-row-height', this.options.minRowHeight);
 
     const items = [];
-    const colSpanClasses = ['w-2x', 'w-3x'];
-    const rowSpanClasses = ['h-2x', 'h-3x'];
-    const numLargeItems = Math.floor(this.images.length * 0.3);
-    const largeItemsIndices = [];
-    while (largeItemsIndices.length < numLargeItems) {
-      const randomIndex = Math.floor(Math.random() * this.images.length);
-      if (!largeItemsIndices.includes(randomIndex)) {
-        largeItemsIndices.push(randomIndex);
-      }
-    }
+    const layout = this.getBalancedLayout(this.images.length);
+    // const colSpanClasses = ['w-2x', 'w-3x'];
+    // const rowSpanClasses = ['h-2x', 'h-3x'];
+    // const numLargeItems = Math.floor(this.images.length * 0.3);
+    // const largeItemsIndices = [];
+    // while (largeItemsIndices.length < numLargeItems) {
+    //   const randomIndex = Math.floor(Math.random() * this.images.length);
+    //   if (!largeItemsIndices.includes(randomIndex)) {
+    //     largeItemsIndices.push(randomIndex);
+    //   }
+    // }
 
     for (let i = 0; i < this.images.length; i++) {
       const itemDiv = document.createElement('div');
@@ -141,12 +142,20 @@ class PortfolioGrid {
       itemDiv.setAttribute('data-index', i);
 
       let classNameModifier = '';
-      let sizeScore = 1; // Default score for smaller items
-      if (this.options.sizeVariation && largeItemsIndices.includes(i)) {
-        const randomColSpan = colSpanClasses[Math.floor(Math.random() * colSpanClasses.length)];
-        const randomRowSpan = rowSpanClasses[Math.floor(Math.random() * rowSpanClasses.length)];
-        classNameModifier = `${randomColSpan} ${randomRowSpan}`;
-        sizeScore = (randomColSpan === 'w-3x' && randomRowSpan === 'h-3x') ? 3 : 2;
+      // let sizeScore = 1; // Default score for smaller items
+      // if (this.options.sizeVariation && largeItemsIndices.includes(i)) {
+      //   const randomColSpan = colSpanClasses[Math.floor(Math.random() * colSpanClasses.length)];
+      //   const randomRowSpan = rowSpanClasses[Math.floor(Math.random() * rowSpanClasses.length)];
+      //   classNameModifier = `${randomColSpan} ${randomRowSpan}`;
+      //   sizeScore = (randomColSpan === 'w-3x' && randomRowSpan === 'h-3x') ? 3 : 2;
+      // }
+
+      switch (layout[i]) {
+        case "2x2": classNameModifier = "w-2x h-2x"; break;
+        case "2x3": classNameModifier = "w-2x h-3x"; break;
+        case "3x2": classNameModifier = "w-3x h-2x"; break;
+        case "3x3": classNameModifier = "w-3x h-3x"; break;
+        default: classNameModifier = ""; // 1x1
       }
 
       if (classNameModifier) {
@@ -162,16 +171,54 @@ class PortfolioGrid {
         </div>
       `;
       itemDiv.addEventListener('click', () => this.showLightbox(i));
-      items.push({ element: itemDiv, sizeScore: sizeScore });
+      items.push(itemDiv);
     }
 
     // Sort the items by size (largest first)
     items.sort((a, b) => b.sizeScore - a.sizeScore);
 
     // Add the sorted items to the container
-    items.forEach(item => this.container.appendChild(item.element));
+    // items.forEach(item => this.container.appendChild(item.element));
+    // Voeg in dezelfde volgorde toe, zodat je balanced layout behouden blijft
+    items.forEach(el => this.container.appendChild(el));
 
     this.setupScrollSnap();
+  }
+
+  getBalancedLayout(numItems) {
+    const layout = [];
+    const patterns = ["1x1", "2x2", "2x3", "3x2", "3x3"];
+
+    const targetCounts = {
+      "3x3": Math.floor(numItems * 0.1),
+      "2x3": Math.floor(numItems * 0.15),
+      "3x2": Math.floor(numItems * 0.15),
+      "2x2": Math.floor(numItems * 0.2),
+      "1x1": numItems // rest vult alles op
+    };
+
+    for (let i = 0; i < numItems; i++) {
+      // filter alleen geldige keuzes
+      let validChoices = patterns.filter(p => targetCounts[p] > 0);
+
+      // vermijd dubbels naast elkaar
+      validChoices = validChoices.filter(p =>
+        !(layout[i - 1] === p || layout[i - 4] === p)
+      );
+
+      // als er nu niks overblijft → fallback naar "1x1"
+      let choice;
+      if (validChoices.length > 0) {
+        choice = validChoices[Math.floor(Math.random() * validChoices.length)];
+      } else {
+        choice = "1x1";
+      }
+
+      layout.push(choice);
+      targetCounts[choice]--;
+    }
+
+    return layout;
   }
 
   /**
