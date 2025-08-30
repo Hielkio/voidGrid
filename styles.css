@@ -1,13 +1,39 @@
 :root {
     font-family: 'Inter', sans-serif;
+    --bg-color: #1a202c;
+    --text-color: white;
+    --section-bg: #0d0f12;
+    --button-bg: rgba(0, 0, 0, 0.9);
+    --button-border: #3b82f6;
+    --button-text: #60a5fa;
+    --button-hover-bg: #3b82f6;
+    --button-hover-text: white;
+    --overlay-bg: rgba(0, 0, 0, 0.8);
+    --lightbox-bg: rgba(0, 0, 0, 0.5);
 }
+
+[data-theme="light"] {
+    --bg-color: #f8fafc;
+    --text-color: #1e293b;
+    --section-bg: #ffffff;
+    --button-bg: rgba(255, 255, 255, 0.9);
+    --button-border: #3b82f6;
+    --button-text: #1e40af;
+    --button-hover-bg: #3b82f6;
+    --button-hover-text: white;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+    --lightbox-bg: rgba(0, 0, 0, 0.3);
+}
+
 body {
-    background-color: #1a202c;
-    color: white;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     overflow: hidden; /* Prevent the body from scrolling */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 .page-section {
-    background-color: #0d0f12;
+    background-color: var(--section-bg);
+    transition: background-color 0.3s ease;
 }
 .text-glow {
     text-shadow: 0 0 8px rgba(59, 130, 246, 0.6), 0 0 24px rgba(59, 130, 246, 0.4);

@@ -313,6 +313,53 @@ class PortfolioGrid {
   }
 }
 
+// Theme switching functionality
+class ThemeManager {
+  constructor() {
+    this.theme = localStorage.getItem('theme') || 'dark';
+    this.init();
+  }
+
+  init() {
+    this.applyTheme();
+    this.setupToggle();
+  }
+
+  applyTheme() {
+    document.documentElement.setAttribute('data-theme', this.theme);
+    this.updateIcons();
+  }
+
+  toggleTheme() {
+    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', this.theme);
+    this.applyTheme();
+  }
+
+  updateIcons() {
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    if (this.theme === 'dark') {
+      sunIcon.classList.remove('hidden');
+      moonIcon.classList.add('hidden');
+    } else {
+      sunIcon.classList.add('hidden');
+      moonIcon.classList.remove('hidden');
+    }
+  }
+
+  setupToggle() {
+    const toggleButton = document.getElementById('themeToggle');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', () => this.toggleTheme());
+    }
+  }
+}
+
+// Initialize theme manager
+const themeManager = new ThemeManager();
+
 // Auto-initialize elements with data-portfolio attribute
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-portfolio]').forEach(el => {
