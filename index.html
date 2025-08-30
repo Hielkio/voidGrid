@@ -18,14 +18,14 @@
 <section id="portfolio" class="page-section h-screen flex flex-col justify-center items-center py-0">
     <div class="section-content w-full h-full flex flex-col items-center justify-center relative">
 
-        <!-- Dynamische Masonry Container -->
+        <!-- Dynamic Masonry Container -->
         <div id="portfolioContainer" class="portfolio-masonry-container absolute inset-0 p-8">
             <!-- Images are added here by JavaScript -->
         </div>
 
         <!-- "View More" button -->
         <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-            <button id="togglePortfolio" class="bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+            <button class="portfolio-toggle bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
                 View More Work
             </button>
         </div>
@@ -47,6 +47,10 @@
 </div>
 
 <script src="script.js"></script>
+<script>
+  // Initialize the portfolio grid
+  new PortfolioGrid("#portfolioContainer");
+</script>
 
 </body>
 </html>

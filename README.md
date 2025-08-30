@@ -12,10 +12,40 @@ A responsive masonry-style grid portfolio layout with lightbox functionality, bu
 
 ## How to Use
 
+### Basic Usage
+
 1. Clone or download the repository.
 2. Open `index.html` in a web browser.
-3. Click the "Bekijk Meer Werk" button to generate the portfolio grid.
+3. Click the "View More Work" button to generate the portfolio grid.
 4. Click on any portfolio item to open the lightbox and view the image.
+
+### Programmatic Usage
+
+You can initialize the portfolio grid programmatically using the `PortfolioGrid` class:
+
+```javascript
+// Basic initialization
+new PortfolioGrid("#myPortfolio");
+
+// With custom options
+new PortfolioGrid("#myPortfolio", {
+  numImages: 15,
+  gap: "1.5rem",
+  border: "border border-gray-300",
+  sizeVariation: false,
+  lightbox: true
+});
+```
+
+### Data Attribute Initialization
+
+You can also use data attributes for automatic initialization:
+
+```html
+<div data-portfolio="myPortfolio" data-portfolio-options='{"numImages": 10}'></div>
+```
+
+The script will automatically initialize all elements with the `data-portfolio` attribute.
 
 ## Dependencies
 
