@@ -1,15 +1,15 @@
-// Registreer de GSAP plugin
+// Register the GSAP plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// === Configuratie opties ===
+// === Configuration options ===
 const CONFIG = {
-    numImages: 25, // Aantal afbeeldingen om te tonen
-    gap: '2rem', // Ruimte tussen de afbeeldingen
-    border: 'border-2 border-blue-500', // Rand/border rond de afbeeldingen
-    sizeVariation: true, // Variabele grootte inschakelen
-    minRowHeight: '200px', // De minimale hoogte van een rij in de grid
+    numImages: 25, // Number of images to display
+    gap: '2rem', // Space between the images
+    border: 'border-2 border-blue-500', // Border around the images
+    sizeVariation: true, // Enable variable size
+    minRowHeight: '200px', // The minimum height of a row in the grid
     lightbox: {
-        overlayColor: 'rgba(0, 0, 0, 0.9)', // Kleur van de overlay
+        overlayColor: 'rgba(0, 0, 0, 0.9)', // Color of the overlay
         imageDescriptions: {
             "https://images.alphacoders.com/605/thumb-1920-605592.png": "A majestic landscape with mountains and clouds.",
             "https://images.alphacoders.com/131/thumb-1920-1311951.jpg": "A starry night sky over a serene village.",
@@ -43,7 +43,7 @@ const CONFIG = {
     }
 };
 
-// === Lijst van de te gebruiken afbeeldingen ===
+// === List of images to use ===
 const images = [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -89,13 +89,13 @@ const lightboxOverlay = document.querySelector('.lightbox-overlay');
 let currentImageIndex = 0;
 
 /**
- * Genereert de portfolio items en voegt deze toe aan de container.
+ * Generates the portfolio items and adds them to the container.
  */
 function generatePortfolio() {
-    portfolioContainer.innerHTML = ''; // Maak de container leeg
+    portfolioContainer.innerHTML = ''; // Clear the container
     portfolioContainer.style.gap = CONFIG.gap;
 
-    // Stel de CSS-variabele in voor de minimale rijhoogte
+    // Set the CSS variable for the minimum row height
     portfolioContainer.style.setProperty('--min-row-height', CONFIG.minRowHeight);
 
     const items = [];
@@ -116,7 +116,7 @@ function generatePortfolio() {
         itemDiv.setAttribute('data-index', i);
 
         let classNameModifier = '';
-        let sizeScore = 1; // Standaard score voor kleinere items
+        let sizeScore = 1; // Default score for smaller items
         if (CONFIG.sizeVariation && largeItemsIndices.includes(i)) {
             const randomColSpan = colSpanClasses[Math.floor(Math.random() * colSpanClasses.length)];
             const randomRowSpan = rowSpanClasses[Math.floor(Math.random() * rowSpanClasses.length)];
@@ -131,7 +131,7 @@ function generatePortfolio() {
         const imageUrl = images[i];
 
         itemDiv.innerHTML = `
-            <img src="${imageUrl}" alt="Portfolio afbeelding ${i + 1}" class="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110">
+            <img src="${imageUrl}" alt="Portfolio image ${i + 1}" class="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110">
             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center">
                 <p class="text-lg font-bold">Project ${i + 1}</p>
             </div>
@@ -140,32 +140,32 @@ function generatePortfolio() {
         items.push({ element: itemDiv, sizeScore: sizeScore });
     }
 
-    // Sorteer de items op basis van hun grootte (grootste eerst)
+    // Sort the items by size (largest first)
     items.sort((a, b) => b.sizeScore - a.sizeScore);
 
-    // Voeg de gesorteerde items toe aan de container
+    // Add the sorted items to the container
     items.forEach(item => portfolioContainer.appendChild(item.element));
 
     setupScrollSnap();
 }
 
 /**
- * Stelt de ScrollTrigger in voor het "snappen" naar de afbeeldingen.
+ * Sets up the ScrollTrigger for "snapping" to the images.
  */
 function setupScrollSnap() {
-    // Vernietig een bestaande ScrollTrigger om conflicten te voorkomen
+    // Destroy an existing ScrollTrigger to prevent conflicts
     if (portfolioContainer.scrollTrigger) {
         portfolioContainer.scrollTrigger.kill();
     }
 
-    // Creëer een array van de top-posities van elke afbeelding voor het snappen
+    // Create an array of the top positions of each image for snapping
     let snapPoints = [];
     const items = gsap.utils.toArray(".portfolio-item");
     items.forEach(item => {
         snapPoints.push(item.offsetTop);
     });
 
-    // Filter duplicaten uit de snap-posities, want meerdere items kunnen op dezelfde Y-positie staan
+    // Filter duplicates from the snap positions, as multiple items can be at the same Y position
     snapPoints = [...new Set(snapPoints)];
 
     ScrollTrigger.create({
@@ -178,11 +178,11 @@ function setupScrollSnap() {
             duration: {min: 0.2, max: 0.6},
             ease: "power1.inOut"
         },
-        markers: false // Voor debugging, zet op true
+        markers: false // For debugging, set to true
     });
 }
 
-// === Lightbox logica ===
+// === Lightbox logic ===
 function showLightbox(index) {
     currentImageIndex = index;
     updateLightboxContent();
@@ -239,7 +239,7 @@ lightboxOverlay.addEventListener('click', hideLightbox);
 lightboxNext.addEventListener('click', goToNextImage);
 lightboxPrev.addEventListener('click', goToPrevImage);
 
-// Swipe logica
+// Swipe logic
 let touchstartX = 0;
 let touchendX = 0;
 
@@ -261,5 +261,5 @@ lightboxImage.addEventListener('touchend', e => {
     handleGesture();
 });
 
-// Genereer de eerste set afbeeldingen bij het laden van de pagina
+// Generate the first set of images on page load
 document.addEventListener('DOMContentLoaded', generatePortfolio);
