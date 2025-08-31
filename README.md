@@ -98,11 +98,21 @@ The JSON files should contain an array of objects with `image_url` and `title` p
 
 ### Gradient Borders
 
-When `gradientBorder: true` is enabled, each image will automatically get a gradient border that matches the dominant colors in the image. The system extracts colors from the image using canvas analysis and creates high-contrast gradients for visual appeal.
+When `gradientBorder: true` is enabled, each image will automatically get a gradient border that matches the dominant colors in the image. The system uses an advanced color extraction algorithm that:
+
+- Analyzes pixel data from the image using canvas
+- Identifies the most dominant color through color quantization
+- Creates vibrant, high-contrast gradients using HSL color space
+- Generates complementary and analogous colors for better visual appeal
+
+**Performance Features:**
+- **Intelligent Caching**: Extracted colors are cached in memory and localStorage to avoid re-processing the same images
+- **Optimized Sampling**: Uses smart pixel sampling (up to 10k pixels) for better performance
+- **Batch Processing**: Colors are saved to localStorage periodically for persistence across page reloads
 
 **Important**: When gradient borders are enabled, the default border styling is automatically disabled to prevent visual conflicts. Only the gradient border will be visible.
 
-**Note**: Due to CORS (Cross-Origin Resource Sharing) restrictions, gradient borders work best with images from the same domain. For external images, a default attractive gradient will be applied as a fallback.
+**Note**: Due to CORS (Cross-Origin Resource Sharing) restrictions, gradient borders work best with images from the same domain. For external images, a beautiful default gradient will be applied as a fallback.
 
 ### Using Custom Images
 

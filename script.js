@@ -86,6 +86,9 @@ class VoidGrid {
     this.images = this.options.images;
     this.currentImageIndex = 0;
 
+    // Load color cache for better performance
+    this.loadColorCache();
+
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
     if (!this.toggleButton) {
@@ -141,45 +144,170 @@ class VoidGrid {
   }
 
   /**
-   * Extracts dominant color from an image using canvas
+   * Cache for storing extracted colors
+   */
+  colorCache = new Map();
+
+  /**
+   * Load cached colors from localStorage
+   */
+  loadColorCache() {
+    try {
+      const cached = localStorage.getItem('voidgrid-color-cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Convert back to Map
+        Object.entries(parsed).forEach(([key, value]) => {
+          this.colorCache.set(key, value);
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to load color cache:', error);
+    }
+  }
+
+  /**
+   * Save cached colors to localStorage
+   */
+  saveColorCache() {
+    try {
+      const cacheObject = Object.fromEntries(this.colorCache);
+      localStorage.setItem('voidgrid-color-cache', JSON.stringify(cacheObject));
+    } catch (error) {
+      console.warn('Failed to save color cache:', error);
+    }
+  }
+
+  /**
+   * Extracts dominant colors from an image using canvas with improved algorithm
    */
   extractImageColor(img) {
     return new Promise((resolve, reject) => {
+      // Check cache first
+      const cacheKey = img.src;
+      if (this.colorCache.has(cacheKey)) {
+        resolve(this.colorCache.get(cacheKey));
+        return;
+      }
+
       try {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = Math.min(img.naturalWidth, 100); // Limit size for performance
-        canvas.height = Math.min(img.naturalHeight, 100);
+        // Use smaller canvas for better performance
+        const maxSize = 80;
+        const scale = Math.min(maxSize / img.naturalWidth, maxSize / img.naturalHeight, 1);
+        canvas.width = img.naturalWidth * scale;
+        canvas.height = img.naturalHeight * scale;
 
         // Try to draw the image - this will fail for CORS-protected images
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-        // Calculate average color
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let i = 0; i < imageData.length; i += 4 * 10) { // Skip pixels for performance
-          r += imageData[i];
-          g += imageData[i + 1];
-          b += imageData[i + 2];
-          count++;
+        // Improved color extraction using color quantization
+        const colorCounts = new Map();
+        const step = 4 * Math.max(1, Math.floor(imageData.length / 10000)); // Sample up to ~10k pixels
+
+        for (let i = 0; i < imageData.length; i += step) {
+          const r = imageData[i];
+          const g = imageData[i + 1];
+          const b = imageData[i + 2];
+          const alpha = imageData[i + 3];
+
+          // Skip transparent pixels
+          if (alpha < 128) continue;
+
+          // Skip very dark/light pixels
+          const brightness = (r + g + b) / 3;
+          if (brightness < 20 || brightness > 235) continue;
+
+          // Quantize colors to reduce variations
+          const qr = Math.floor(r / 16) * 16;
+          const qg = Math.floor(g / 16) * 16;
+          const qb = Math.floor(b / 16) * 16;
+          const key = `${qr},${qg},${qb}`;
+
+          colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
         }
 
-        r = Math.floor(r / count);
-        g = Math.floor(g / count);
-        b = Math.floor(b / count);
+        // Find the most dominant color
+        let dominantColor = { r: 128, g: 128, b: 128 }; // Default gray
+        let maxCount = 0;
 
-        // Create high contrast colors
-        const brightColor = `rgb(${Math.min(255, r * 1.4)}, ${Math.min(255, g * 1.4)}, ${Math.min(255, b * 1.4)})`;
-        const darkColor = `rgb(${Math.max(0, r * 0.6)}, ${Math.max(0, g * 0.6)}, ${Math.max(0, b * 0.6)})`;
+        for (const [key, count] of colorCounts) {
+          if (count > maxCount) {
+            const [r, g, b] = key.split(',').map(Number);
+            dominantColor = { r, g, b };
+            maxCount = count;
+          }
+        }
 
-        resolve({ bright: brightColor, dark: darkColor });
+        // Create more sophisticated gradient colors
+        const { r, g, b } = dominantColor;
+
+        // Generate a vibrant gradient based on the dominant color
+        const hsl = this.rgbToHsl(r, g, b);
+        const saturation = Math.max(0.4, hsl[1]); // Ensure good saturation
+        const lightness = Math.max(0.3, Math.min(0.7, hsl[2])); // Avoid extremes
+
+        // Create complementary colors for better gradient
+        const hue1 = hsl[0];
+        const hue2 = (hsl[0] + 60) % 360; // Analogous color
+        const hue3 = (hsl[0] + 180) % 360; // Complementary color
+
+        const brightColor = `hsl(${hue1}, ${saturation * 100}%, ${Math.min(85, lightness * 100 + 20)}%)`;
+        const darkColor = `hsl(${hue2}, ${Math.max(30, saturation * 100 - 20)}%, ${Math.max(15, lightness * 100 - 30)}%)`;
+        const accentColor = `hsl(${hue3}, ${saturation * 100}%, ${Math.max(25, lightness * 100 - 10)}%)`;
+
+        const result = {
+          bright: brightColor,
+          dark: darkColor,
+          accent: accentColor
+        };
+
+        // Cache the result
+        this.colorCache.set(cacheKey, result);
+
+        // Save to localStorage periodically
+        if (this.colorCache.size % 5 === 0) { // Save every 5 new colors
+          this.saveColorCache();
+        }
+
+        resolve(result);
       } catch (error) {
         // CORS error or other canvas drawing error
         reject(error);
       }
     });
+  }
+
+  /**
+   * Convert RGB to HSL
+   */
+  rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; // achromatic
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return [h * 360, s, l];
   }
 
   /**
@@ -247,13 +375,13 @@ class VoidGrid {
           try {
             const colors = await this.extractImageColor(img);
             img.style.border = '8px solid transparent';
-            img.style.borderImage = `linear-gradient(135deg, ${colors.bright}, ${colors.dark}) 1`;
+            img.style.borderImage = `linear-gradient(135deg, ${colors.bright}, ${colors.accent}, ${colors.dark}) 1`;
           } catch (error) {
             // CORS error or other canvas issue - apply a default gradient instead
             console.warn('Failed to extract colors for gradient border (likely CORS issue):', error);
             // Apply a default attractive gradient as fallback
             img.style.border = '8px solid transparent';
-            img.style.borderImage = `linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1`;
+            img.style.borderImage = `linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) 1`;
           }
         };
 
