@@ -282,18 +282,18 @@ class VoidGrid {
 
   createLightbox() {
     // Create lightbox elements if they don't exist
-    if (!document.getElementById('lightbox')) {
+    if (!document.getElementById('void-lightbox')) {
       const lightboxHTML = `
-        <div id="lightbox">
-          <div class="lightbox-overlay"></div>
-          <div class="lightbox-content">
-            <span id="closeLightbox" class="close-button">&times;</span>
-            <div class="lightbox-image-container rounded-lg">
-              <img id="lightboxImage" src="" alt="Lightbox Image" class="lightbox-image">
+        <div id="void-lightbox">
+          <div class="void-lightbox-overlay"></div>
+          <div class="void-lightbox-content">
+            <span id="void-close-lightbox" class="void-close-button">&times;</span>
+            <div class="void-lightbox-image-container rounded-lg">
+              <img id="void-lightbox-image" src="" alt="VoidGrid Image" class="void-lightbox-image">
             </div>
-            <p id="lightboxDescription" class="mt-4 text-center text-lg max-w-2xl"></p>
-            <div id="lightboxPrev" class="lightbox-arrow left">&#10094;</div>
-            <div id="lightboxNext" class="lightbox-arrow right">&#10095;</div>
+            <p id="void-lightbox-description" class="mt-4 text-center text-lg max-w-2xl"></p>
+            <div id="void-lightbox-prev" class="void-lightbox-arrow left">&#10094;</div>
+            <div id="void-lightbox-next" class="void-lightbox-arrow right">&#10095;</div>
           </div>
         </div>
       `;
@@ -301,13 +301,13 @@ class VoidGrid {
     }
 
     // Get lightbox elements
-    this.lightbox = document.getElementById('lightbox');
-    this.lightboxImage = document.getElementById('lightboxImage');
-    this.lightboxDescription = document.getElementById('lightboxDescription');
-    this.lightboxPrev = document.getElementById('lightboxPrev');
-    this.lightboxNext = document.getElementById('lightboxNext');
-    this.closeLightboxBtn = document.getElementById('closeLightbox');
-    this.lightboxOverlay = document.querySelector('.lightbox-overlay');
+    this.lightbox = document.getElementById('void-lightbox');
+    this.lightboxImage = document.getElementById('void-lightbox-image');
+    this.lightboxDescription = document.getElementById('void-lightbox-description');
+    this.lightboxPrev = document.getElementById('void-lightbox-prev');
+    this.lightboxNext = document.getElementById('void-lightbox-next');
+    this.closeLightboxBtn = document.getElementById('void-close-lightbox');
+    this.lightboxOverlay = document.querySelector('.void-lightbox-overlay');
 
     // Set up event listeners
     this.closeLightboxBtn.addEventListener('click', () => this.hideLightbox());
