@@ -86,11 +86,11 @@ class VoidGrid {
     this.currentImageIndex = 0;
 
     // Find or create toggle button
-    this.toggleButton = this.container.querySelector('.portfolio-toggle') || this.container.parentElement.querySelector('.portfolio-toggle');
+    this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
     if (!this.toggleButton) {
       // Create a default toggle button if not found
       this.toggleButton = document.createElement('button');
-      this.toggleButton.className = 'portfolio-toggle bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl';
+      this.toggleButton.className = 'voidgrid-toggle bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl';
       this.toggleButton.textContent = 'View More Work';
       this.container.parentElement.appendChild(this.toggleButton);
     }
@@ -124,15 +124,15 @@ class VoidGrid {
   }
 
   init() {
-    // Generate initial portfolio
-    this.generatePortfolio();
+    // Generate initial voidgrid
+    this.generateVoidGrid();
 
     // Set up event listeners
-    this.toggleButton.addEventListener('click', () => this.generatePortfolio());
+    this.toggleButton.addEventListener('click', () => this.generateVoidGrid());
 
-    // Generate initial portfolio if no toggle
+    // Generate initial voidgrid if no toggle
     if (!this.toggleButton) {
-      this.generatePortfolio();
+      this.generateVoidGrid();
     }
 
     // Create lightbox if it doesn't exist
@@ -140,9 +140,9 @@ class VoidGrid {
   }
 
   /**
-   * Generates the portfolio items and adds them to the container.
+   * Generates the voidgrid items and adds them to the container.
    */
-  generatePortfolio() {
+  generateVoidGrid() {
     this.container.innerHTML = ''; // Clear the container
     this.container.style.gap = this.options.gap;
 
@@ -164,7 +164,7 @@ class VoidGrid {
 
     for (let i = 0; i < this.images.length; i++) {
       const itemDiv = document.createElement('div');
-      itemDiv.className = `portfolio-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer transform transition-transform duration-300 hover:scale-105 ${this.options.border}`;
+      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer transform transition-transform duration-300 hover:scale-105 ${this.options.border}`;
       itemDiv.setAttribute('data-index', i);
 
       let classNameModifier = '';
@@ -191,7 +191,7 @@ class VoidGrid {
       const imageUrl = this.images[i];
 
       itemDiv.innerHTML = `
-        <img src="${imageUrl}" alt="Portfolio image ${i + 1}" class="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110">
+        <img src="${imageUrl}" alt="VoidGrid image ${i + 1}" class="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110">
         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center">
           <p class="text-lg font-bold">Project ${i + 1}</p>
         </div>
@@ -258,7 +258,7 @@ class VoidGrid {
 
     // Create an array of the top positions of each image for snapping
     let snapPoints = [];
-    const items = gsap.utils.toArray(".portfolio-item", this.container);
+    const items = gsap.utils.toArray(".voidgrid-item", this.container);
     items.forEach(item => {
       snapPoints.push(item.offsetTop);
     });
@@ -436,10 +436,10 @@ class ThemeManager {
 // Initialize theme manager
 const themeManager = new ThemeManager();
 
-// Auto-initialize elements with data-portfolio attribute
+// Auto-initialize elements with data-voidgrid attribute
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-portfolio]').forEach(el => {
-    const options = el.dataset.portfolioOptions ? JSON.parse(el.dataset.portfolioOptions) : {};
-    new VoidGrid(`[data-portfolio="${el.dataset.portfolio}"]`, options);
+  document.querySelectorAll('[data-voidgrid]').forEach(el => {
+    const options = el.dataset.voidgridOptions ? JSON.parse(el.dataset.voidgridOptions) : {};
+    new VoidGrid(`[data-voidgrid="${el.dataset.voidgrid}"]`, options);
   });
 });

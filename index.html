@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
+    <title>VoidGrid</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,17 +26,17 @@
 </head>
 <body>
 
-<section id="portfolio" class="page-section h-screen flex flex-col justify-center items-center py-0">
+<section id="voidgrid" class="page-section h-screen flex flex-col justify-center items-center py-0">
     <div class="section-content w-full h-full flex flex-col items-center justify-center relative">
 
         <!-- Dynamic Masonry Container -->
-        <div id="portfolioContainer" class="portfolio-masonry-container absolute inset-0 p-8">
+        <div id="voidgridContainer" class="voidgrid-masonry-container absolute inset-0 p-8">
             <!-- Images are added here by JavaScript -->
         </div>
 
         <!-- "View More" button -->
         <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-            <button class="portfolio-toggle bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+            <button class="voidgrid-toggle bg-black/90 backdrop-blur-md border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
                 View More Work
             </button>
         </div>
@@ -59,8 +59,8 @@
 
 <script src="script.js"></script>
 <script>
-  // Initialize the portfolio grid with nature source
-  new VoidGrid("#portfolioContainer", { source: 'sources/tropical.json' });
+  // Initialize the voidgrid with tropical source
+  new VoidGrid("#voidgridContainer", { source: 'sources/tropical.json' });
 </script>
 
 </body>

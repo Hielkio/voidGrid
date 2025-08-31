@@ -1,6 +1,6 @@
 # voidGrid
 
-A responsive masonry-style grid portfolio layout with lightbox functionality, built using HTML, CSS (Tailwind), and JavaScript with GSAP animations.
+A responsive masonry-style grid voidgrid layout with lightbox functionality, built using HTML, CSS (Tailwind), and JavaScript with GSAP animations.
 
 ## 🚀 Development Status
 
@@ -22,19 +22,19 @@ If you find any issues or have suggestions, feel free to open an issue or contri
 
 1. Clone or download the repository.
 2. Open `index.html` in a web browser.
-3. Click the "View More Work" button to generate the portfolio grid.
-4. Click on any portfolio item to open the lightbox and view the image.
+3. Click the "View More Work" button to generate the voidgrid.
+4. Click on any voidgrid item to open the lightbox and view the image.
 
 ### Programmatic Usage
 
-You can initialize the portfolio grid programmatically using the `PortfolioGrid` class:
+You can initialize the voidgrid programmatically using the `VoidGrid` class:
 
 ```javascript
 // Basic initialization
-new PortfolioGrid("#myPortfolio");
+new VoidGrid("#myVoidGrid");
 
 // With custom options
-new PortfolioGrid("#myPortfolio", {
+new VoidGrid("#myVoidGrid", {
   numImages: 15,
   gap: "1.5rem",
   border: "border border-gray-300",
@@ -49,10 +49,10 @@ new PortfolioGrid("#myPortfolio", {
 You can also use data attributes for automatic initialization:
 
 ```html
-<div data-portfolio="myPortfolio" data-portfolio-options='{"numImages": 10}'></div>
+<div data-voidgrid="myVoidGrid" data-voidgrid-options='{"numImages": 10}'></div>
 ```
 
-The script will automatically initialize all elements with the `data-portfolio` attribute.
+The script will automatically initialize all elements with the `data-voidgrid` attribute.
 
 ## Dependencies
 
@@ -72,14 +72,14 @@ The grid behavior can be customized via the `CONFIG` object in the JavaScript se
 
 ## Images
 
-The portfolio supports loading images from JSON files or using a predefined array of external image URLs.
+The voidgrid supports loading images from JSON files or using a predefined array of external image URLs.
 
 ### Using JSON Sources
 
 You can load images from JSON files in the `sources/` directory:
 
 ```javascript
-new PortfolioGrid("#myPortfolio", {
+new VoidGrid("#myVoidGrid", {
   source: "sources/nature.json" // Loads nature images
 });
 
