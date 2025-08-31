@@ -31,10 +31,10 @@ You can initialize the voidgrid programmatically using the `VoidGrid` class:
 
 ```javascript
 // Basic initialization
-new VoidGrid("#myVoidGrid");
+new VoidGrid("#myvoidgrid");
 
 // With custom options
-new VoidGrid("#myVoidGrid", {
+new VoidGrid("#myvoidgrid", {
   numImages: 15,
   gap: "1.5rem",
   border: "border border-gray-300",
@@ -49,7 +49,7 @@ new VoidGrid("#myVoidGrid", {
 You can also use data attributes for automatic initialization:
 
 ```html
-<div data-voidgrid="myVoidGrid" data-voidgrid-options='{"numImages": 10}'></div>
+<div data-voidgrid="myvoidgrid" data-voidgrid-options='{"numImages": 10}'></div>
 ```
 
 The script will automatically initialize all elements with the `data-voidgrid` attribute.
@@ -79,7 +79,7 @@ The voidgrid supports loading images from JSON files or using a predefined array
 You can load images from JSON files in the `sources/` directory:
 
 ```javascript
-new VoidGrid("#myVoidGrid", {
+new VoidGrid("#myvoidgrid", {
   source: "sources/nature.json" // Loads nature images
 });
 
