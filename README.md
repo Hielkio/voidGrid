@@ -110,6 +110,11 @@ When `gradientBorder: true` is enabled, each image will automatically get a grad
 - **Optimized Sampling**: Uses smart pixel sampling (up to 10k pixels) for better performance
 - **Batch Processing**: Colors are saved to localStorage periodically for persistence across page reloads
 
+**Loading Experience:**
+- **Loading Spinners**: Each image shows a rotating loading spinner while the image loads
+- **Smooth Transitions**: Images fade in smoothly once loaded
+- **Error Handling**: Graceful handling of failed image loads
+
 **Important**: When gradient borders are enabled, the default border styling is automatically disabled to prevent visual conflicts. Only the gradient border will be visible.
 
 **Note**: Due to CORS (Cross-Origin Resource Sharing) restrictions, gradient borders work best with images from the same domain. For external images, a beautiful default gradient will be applied as a fallback.

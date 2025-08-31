@@ -6,7 +6,7 @@ const defaultOptions = {
   sizeVariation: true,
   // minRowHeight: '200px',
   source: null, // Path to JSON file for images
-  gradientBorder: true, // Enable gradient borders based on image colors
+  gradientBorder: false, // Enable gradient borders based on image colors
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -363,15 +363,25 @@ class VoidGrid {
 
       const imageUrl = this.images[i];
 
+      // Create loading spinner
+      const spinner = document.createElement('div');
+      spinner.className = 'voidgrid-loading-spinner';
+
       // Create image element
       const img = document.createElement('img');
       img.src = imageUrl;
       img.alt = `VoidGrid image ${i + 1}`;
-      img.className = 'w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110';
+      img.className = 'w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110 voidgrid-image-loading';
 
-      // Apply gradient border if enabled
-      if (this.options.gradientBorder) {
-        img.onload = async () => {
+      // Handle image load
+      img.onload = async () => {
+        // Hide spinner and show image
+        spinner.style.display = 'none';
+        img.classList.remove('voidgrid-image-loading');
+        img.classList.add('voidgrid-image-loaded');
+
+        // Apply gradient border if enabled
+        if (this.options.gradientBorder) {
           try {
             const colors = await this.extractImageColor(img);
             img.style.border = '8px solid transparent';
@@ -383,13 +393,15 @@ class VoidGrid {
             img.style.border = '8px solid transparent';
             img.style.borderImage = `linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) 1`;
           }
-        };
+        }
+      };
 
-        // Handle load errors
-        img.onerror = () => {
-          console.warn('Image failed to load:', img.src);
-        };
-      }
+      // Handle load errors
+      img.onerror = () => {
+        console.warn('Image failed to load:', img.src);
+        spinner.style.display = 'none';
+        // Could add an error placeholder here
+      };
 
       itemDiv.innerHTML = `
         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center">
@@ -397,7 +409,8 @@ class VoidGrid {
         </div>
       `;
 
-      // Append image to itemDiv
+      // Append spinner and image to itemDiv
+      itemDiv.appendChild(spinner);
       itemDiv.appendChild(img);
 
       itemDiv.addEventListener('click', () => this.showLightbox(i));
