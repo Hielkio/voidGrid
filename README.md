@@ -40,6 +40,7 @@ new VoidGrid("#myvoidgrid", {
   border: "border border-gray-300",
   sizeVariation: false,
   source: "sources/nature.json", // Load images from JSON file
+  gradientBorder: true, // Enable gradient borders based on image colors
   lightbox: true
 });
 ```
@@ -68,6 +69,7 @@ The grid behavior can be customized via the `CONFIG` object in the JavaScript se
 - `gap`: Spacing between grid items (default: '2rem')
 - `sizeVariation`: Enable/disable random size variations for items (default: true)
 - `minRowHeight`: Minimum height for grid rows (default: '200px')
+- `gradientBorder`: Enable gradient borders based on image colors (default: false)
 - `lightbox`: Settings for the lightbox overlay and descriptions
 
 ## Images
@@ -80,7 +82,8 @@ You can load images from JSON files in the `sources/` directory:
 
 ```javascript
 new VoidGrid("#myvoidgrid", {
-  source: "sources/nature.json" // Loads nature images
+  source: "sources/nature.json", // Loads nature images
+  gradientBorder: true // Optional: Enable gradient borders
 });
 
 // Available sources:
@@ -92,6 +95,10 @@ new VoidGrid("#myvoidgrid", {
 ```
 
 The JSON files should contain an array of objects with `image_url` and `title` properties.
+
+### Gradient Borders
+
+When `gradientBorder: true` is enabled, each image will automatically get a gradient border that matches the dominant colors in the image. The system extracts colors from the image using canvas analysis and creates high-contrast gradients for visual appeal.
 
 ### Using Custom Images
 

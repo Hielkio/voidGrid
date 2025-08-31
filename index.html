@@ -30,7 +30,7 @@
     <div class="section-content w-full h-full flex flex-col items-center justify-center relative">
 
         <!-- Dynamic Masonry Container -->
-        <div id="voidgridContainer" class="voidgrid-masonry-container absolute inset-0 p-8">
+        <div id="voidgridcontainer" class="voidgrid-masonry-container absolute inset-0 p-8">
             <!-- Images are added here by JavaScript -->
         </div>
 
@@ -59,8 +59,11 @@
 
 <script src="script.js"></script>
 <script>
-  // Initialize the voidgrid with tropical source
-  new VoidGrid("#voidgridContainer", { source: 'sources/tropical.json' });
+  // Initialize the voidgrid with concerts source and gradient borders
+  new VoidGrid("#voidgridcontainer", {
+    source: 'sources/concerts.json',
+    gradientBorder: true
+  });
 </script>
 
 </body>

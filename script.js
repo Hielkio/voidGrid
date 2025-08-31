@@ -2,10 +2,11 @@
 const defaultOptions = {
   numImages: 12,
   gap: '2rem',
-  border: 'border-2 border-blue-500',
+  border: 'border-4 border-white/75',
   sizeVariation: true,
   // minRowHeight: '200px',
   source: null, // Path to JSON file for images
+  gradientBorder: false, // Enable gradient borders based on image colors
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -140,6 +141,42 @@ class VoidGrid {
   }
 
   /**
+   * Extracts dominant color from an image using canvas
+   */
+  extractImageColor(img) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = Math.min(img.naturalWidth, 100); // Limit size for performance
+      canvas.height = Math.min(img.naturalHeight, 100);
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      // Calculate average color
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < imageData.length; i += 4 * 10) { // Skip pixels for performance
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+        count++;
+      }
+
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+
+      // Create high contrast colors
+      const brightColor = `rgb(${Math.min(255, r * 1.4)}, ${Math.min(255, g * 1.4)}, ${Math.min(255, b * 1.4)})`;
+      const darkColor = `rgb(${Math.max(0, r * 0.6)}, ${Math.max(0, g * 0.6)}, ${Math.max(0, b * 0.6)})`;
+
+      resolve({ bright: brightColor, dark: darkColor });
+    });
+  }
+
+  /**
    * Generates the voidgrid items and adds them to the container.
    */
   generateVoidGrid() {
@@ -190,12 +227,34 @@ class VoidGrid {
 
       const imageUrl = this.images[i];
 
+      // Create image element
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = `VoidGrid image ${i + 1}`;
+      img.className = 'w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110';
+
+      // Apply gradient border if enabled
+      if (this.options.gradientBorder) {
+        img.onload = async () => {
+          try {
+            const colors = await this.extractImageColor(img);
+            img.style.border = '8px solid transparent';
+            img.style.borderImage = `linear-gradient(135deg, ${colors.bright}, ${colors.dark}) 1`;
+          } catch (error) {
+            console.warn('Failed to extract colors for gradient border:', error);
+          }
+        };
+      }
+
       itemDiv.innerHTML = `
-        <img src="${imageUrl}" alt="VoidGrid image ${i + 1}" class="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110">
         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center">
           <p class="text-lg font-bold">Project ${i + 1}</p>
         </div>
       `;
+
+      // Append image to itemDiv
+      itemDiv.appendChild(img);
+
       itemDiv.addEventListener('click', () => this.showLightbox(i));
       items.push(itemDiv);
     }

@@ -51,7 +51,6 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover; /* Ensure the image fills the entire block */
-    border-radius: 0.5rem; /* Rounded corners */
 }
 /* Extra classes for random size variation */
 .w-2x { grid-column: span 2; }
