@@ -207,7 +207,9 @@ class VoidGrid {
 
     for (let i = 0; i < this.images.length; i++) {
       const itemDiv = document.createElement('div');
-      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer transform transition-transform duration-300 hover:scale-105 ${this.options.border}`;
+      // Only apply default border if gradient borders are not enabled
+      const borderClass = this.options.gradientBorder ? '' : this.options.border;
+      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer transform transition-transform duration-300 hover:scale-105 ${borderClass}`;
       itemDiv.setAttribute('data-index', i);
 
       let classNameModifier = '';
