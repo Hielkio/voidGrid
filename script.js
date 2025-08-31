@@ -6,7 +6,7 @@ const defaultOptions = {
   sizeVariation: true,
   // minRowHeight: '200px',
   source: null, // Path to JSON file for images
-  gradientBorder: false, // Enable gradient borders based on image colors
+  gradientBorder: true, // Enable gradient borders based on image colors
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -144,35 +144,41 @@ class VoidGrid {
    * Extracts dominant color from an image using canvas
    */
   extractImageColor(img) {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-      canvas.width = Math.min(img.naturalWidth, 100); // Limit size for performance
-      canvas.height = Math.min(img.naturalHeight, 100);
+        canvas.width = Math.min(img.naturalWidth, 100); // Limit size for performance
+        canvas.height = Math.min(img.naturalHeight, 100);
 
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Try to draw the image - this will fail for CORS-protected images
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-      // Calculate average color
-      let r = 0, g = 0, b = 0, count = 0;
-      for (let i = 0; i < imageData.length; i += 4 * 10) { // Skip pixels for performance
-        r += imageData[i];
-        g += imageData[i + 1];
-        b += imageData[i + 2];
-        count++;
+        // Calculate average color
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < imageData.length; i += 4 * 10) { // Skip pixels for performance
+          r += imageData[i];
+          g += imageData[i + 1];
+          b += imageData[i + 2];
+          count++;
+        }
+
+        r = Math.floor(r / count);
+        g = Math.floor(g / count);
+        b = Math.floor(b / count);
+
+        // Create high contrast colors
+        const brightColor = `rgb(${Math.min(255, r * 1.4)}, ${Math.min(255, g * 1.4)}, ${Math.min(255, b * 1.4)})`;
+        const darkColor = `rgb(${Math.max(0, r * 0.6)}, ${Math.max(0, g * 0.6)}, ${Math.max(0, b * 0.6)})`;
+
+        resolve({ bright: brightColor, dark: darkColor });
+      } catch (error) {
+        // CORS error or other canvas drawing error
+        reject(error);
       }
-
-      r = Math.floor(r / count);
-      g = Math.floor(g / count);
-      b = Math.floor(b / count);
-
-      // Create high contrast colors
-      const brightColor = `rgb(${Math.min(255, r * 1.4)}, ${Math.min(255, g * 1.4)}, ${Math.min(255, b * 1.4)})`;
-      const darkColor = `rgb(${Math.max(0, r * 0.6)}, ${Math.max(0, g * 0.6)}, ${Math.max(0, b * 0.6)})`;
-
-      resolve({ bright: brightColor, dark: darkColor });
     });
   }
 
@@ -241,8 +247,17 @@ class VoidGrid {
             img.style.border = '8px solid transparent';
             img.style.borderImage = `linear-gradient(135deg, ${colors.bright}, ${colors.dark}) 1`;
           } catch (error) {
-            console.warn('Failed to extract colors for gradient border:', error);
+            // CORS error or other canvas issue - apply a default gradient instead
+            console.warn('Failed to extract colors for gradient border (likely CORS issue):', error);
+            // Apply a default attractive gradient as fallback
+            img.style.border = '8px solid transparent';
+            img.style.borderImage = `linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1`;
           }
+        };
+
+        // Handle load errors
+        img.onerror = () => {
+          console.warn('Image failed to load:', img.src);
         };
       }
 

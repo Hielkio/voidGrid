@@ -100,6 +100,8 @@ The JSON files should contain an array of objects with `image_url` and `title` p
 
 When `gradientBorder: true` is enabled, each image will automatically get a gradient border that matches the dominant colors in the image. The system extracts colors from the image using canvas analysis and creates high-contrast gradients for visual appeal.
 
+**Note**: Due to CORS (Cross-Origin Resource Sharing) restrictions, gradient borders work best with images from the same domain. For external images, a default attractive gradient will be applied as a fallback.
+
 ### Using Custom Images
 
 To use your own images:
