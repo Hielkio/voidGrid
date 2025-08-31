@@ -2,6 +2,12 @@
 
 A responsive masonry-style grid portfolio layout with lightbox functionality, built using HTML, CSS (Tailwind), and JavaScript with GSAP animations.
 
+## 🚀 Development Status
+
+**This project is currently in active development and gets regular updates!**
+We're constantly tweaking, improving, and adding new features. Expect some bugs as we're still in the testing phase - think of it as a wild ride through the void! 🌌
+If you find any issues or have suggestions, feel free to open an issue or contribute!
+
 ## Features
 
 - Masonry grid layout using CSS Grid with random size variations
@@ -33,6 +39,7 @@ new PortfolioGrid("#myPortfolio", {
   gap: "1.5rem",
   border: "border border-gray-300",
   sizeVariation: false,
+  source: "sources/nature.json", // Load images from JSON file
   lightbox: true
 });
 ```
@@ -65,7 +72,30 @@ The grid behavior can be customized via the `CONFIG` object in the JavaScript se
 
 ## Images
 
-The portfolio currently uses a predefined array of external image URLs. To use your own images:
+The portfolio supports loading images from JSON files or using a predefined array of external image URLs.
+
+### Using JSON Sources
+
+You can load images from JSON files in the `sources/` directory:
+
+```javascript
+new PortfolioGrid("#myPortfolio", {
+  source: "sources/nature.json" // Loads nature images
+});
+
+// Available sources:
+// - sources/nature.json
+// - sources/concerts.json
+// - sources/funny-dogs.json
+// - sources/sports-cars.json
+// - sources/tropical.json
+```
+
+The JSON files should contain an array of objects with `image_url` and `title` properties.
+
+### Using Custom Images
+
+To use your own images:
 
 1. Replace the `images` array in the JavaScript with your image URLs.
 2. Update the `CONFIG.lightbox.imageDescriptions` object with descriptions for each image.
