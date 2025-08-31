@@ -5,6 +5,7 @@ const defaultOptions = {
   border: 'border-2 border-blue-500',
   sizeVariation: true,
   // minRowHeight: '200px',
+  source: null, // Path to JSON file for images
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -73,7 +74,7 @@ const defaultOptions = {
 // Register the GSAP plugin
 gsap.registerPlugin(ScrollTrigger);
 
-class PortfolioGrid {
+class VoidGrid {
   constructor(selector, options = {}) {
     this.container = document.querySelector(selector);
     if (!this.container) {
@@ -94,7 +95,32 @@ class PortfolioGrid {
       this.container.parentElement.appendChild(this.toggleButton);
     }
 
-    this.init();
+    if (this.options.source) {
+      this.loadImagesFromSource().then(() => {
+        this.init();
+      });
+    } else {
+      this.init();
+    }
+  }
+
+  async loadImagesFromSource() {
+    try {
+      const response = await fetch(this.options.source);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${this.options.source}`);
+      }
+      const data = await response.json();
+      this.images = data.map(item => item.image_url);
+      this.options.lightbox.imageDescriptions = {};
+      data.forEach(item => {
+        this.options.lightbox.imageDescriptions[item.image_url] = item.title;
+      });
+    } catch (error) {
+      console.error('Error loading images from source:', error);
+      // Fallback to default images
+      this.images = this.options.images;
+    }
   }
 
   init() {
@@ -414,6 +440,6 @@ const themeManager = new ThemeManager();
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-portfolio]').forEach(el => {
     const options = el.dataset.portfolioOptions ? JSON.parse(el.dataset.portfolioOptions) : {};
-    new PortfolioGrid(`[data-portfolio="${el.dataset.portfolio}"]`, options);
+    new VoidGrid(`[data-portfolio="${el.dataset.portfolio}"]`, options);
   });
 });

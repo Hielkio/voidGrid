@@ -80,8 +80,9 @@ body {
 .lightbox-content {
     position: relative;
     z-index: 60;
-    width: 90%;
-    max-width: 900px;
+    width: 80vw;
+    height: 80vh;
+    /* max-width: 900px; */
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -91,7 +92,8 @@ body {
     position: relative;
     overflow: hidden;
     width: 100%;
-    padding-top: 56.25%; /* 16:9 aspect ratio */
+    height: 100%;
+    /* padding-top: 56.25%; */
 }
 .lightbox-image {
     position: absolute;
