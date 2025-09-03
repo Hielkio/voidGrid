@@ -5,7 +5,7 @@ const defaultOptions = {
   border: 'border-4 border-white/75',
   sizeVariation: true,
   // minRowHeight: '200px',
-  source: null, // Path to JSON file for images
+  sources: [], // Array of paths to JSON files for images/videos
   parallax: {
     enabled: false,
     speed: 0.5
@@ -118,8 +118,8 @@ class VoidGrid {
       this.container.parentElement.appendChild(this.toggleButton);
     }
 
-    if (this.options.source) {
-      this.loadImagesFromSource().then(() => {
+    if (this.options.sources && this.options.sources.length > 0) {
+      this.loadImagesFromSources().then(() => {
         this.init();
       });
     } else {
@@ -127,23 +127,54 @@ class VoidGrid {
     }
   }
 
-  async loadImagesFromSource() {
-    try {
-      const response = await fetch(this.options.source);
-      if (!response.ok) {
-        throw new Error(`Failed to load ${this.options.source}`);
+  async loadImagesFromSources() {
+    this.mediaItems = []; // Array to hold both images and videos
+    this.options.lightbox.mediaDescriptions = {};
+
+    for (const source of this.options.sources) {
+      try {
+        const response = await fetch(source);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${source}`);
+        }
+        const data = await response.json();
+
+        // Process each item in the JSON
+        data.forEach(item => {
+          if (item.image_url) {
+            // It's an image
+            this.mediaItems.push({
+              type: 'image',
+              url: item.image_url,
+              title: item.title || 'Image'
+            });
+            this.options.lightbox.mediaDescriptions[item.image_url] = item.title || 'Image';
+          } else if (item.video_url) {
+            // It's a video
+            this.mediaItems.push({
+              type: 'video',
+              url: item.video_url,
+              title: item.title || 'Video'
+            });
+            this.options.lightbox.mediaDescriptions[item.video_url] = item.title || 'Video';
+          }
+        });
+      } catch (error) {
+        console.error('Error loading from source:', source, error);
       }
-      const data = await response.json();
-      this.images = data.map(item => item.image_url);
-      this.options.lightbox.imageDescriptions = {};
-      data.forEach(item => {
-        this.options.lightbox.imageDescriptions[item.image_url] = item.title;
-      });
-    } catch (error) {
-      console.error('Error loading images from source:', error);
-      // Fallback to default images
-      this.images = this.options.images;
     }
+
+    // Fallback to default images if no media loaded
+    if (this.mediaItems.length === 0) {
+      this.mediaItems = this.options.images.map(url => ({
+        type: 'image',
+        url: url,
+        title: 'Default Image'
+      }));
+    }
+
+    // For backward compatibility, also populate this.images
+    this.images = this.mediaItems.map(item => item.url);
   }
 
   init() {
@@ -198,7 +229,7 @@ class VoidGrid {
     //   }
     // }
 
-    for (let i = 0; i < this.images.length; i++) {
+    for (let i = 0; i < this.mediaItems.length; i++) {
       const itemDiv = document.createElement('div');
       itemDiv.className = `voidgrid-item overflow-hidden relative shadow-lg group cursor-pointer ${this.options.border}`;
       if (this.options.rounded.enabled) {
@@ -227,35 +258,65 @@ class VoidGrid {
         itemDiv.classList.add(...classNameModifier.split(' '));
       }
 
-      const imageUrl = this.images[i];
+      const mediaItem = this.mediaItems[i];
 
       // Create loading spinner
       const spinner = document.createElement('div');
       spinner.className = 'voidgrid-loading-spinner';
 
-      // Create image element
-      const img = document.createElement('img');
-      img.src = imageUrl;
-      img.alt = `VoidGrid image ${i + 1}`;
+      let mediaElement;
 
-      // Apply hover zoom speed
-      const zoomDuration = this.options.hover.zoomSpeed || 2;
-      img.className = `w-full h-full object-cover transition-transform duration-${Math.round(zoomDuration * 1000)} group-hover:scale-110 voidgrid-image-loading`;
+      if (mediaItem.type === 'video') {
+        // Create video element
+        mediaElement = document.createElement('video');
+        mediaElement.src = mediaItem.url;
+        mediaElement.alt = `VoidGrid video ${i + 1}`;
+        mediaElement.muted = true; // Required for autoplay
+        mediaElement.autoplay = true;
+        mediaElement.loop = true;
+        mediaElement.playsInline = true; // For mobile
 
-      // Handle image load
-      img.onload = () => {
-        // Hide spinner and show image
-        spinner.style.display = 'none';
-        img.classList.remove('voidgrid-image-loading');
-        img.classList.add('voidgrid-image-loaded');
-      };
+        // Apply hover zoom speed
+        const zoomDuration = this.options.hover.zoomSpeed || 2;
+        mediaElement.className = `w-full h-full object-cover transition-transform duration-${Math.round(zoomDuration * 1000)} group-hover:scale-110 voidgrid-video-loading`;
 
-      // Handle load errors
-      img.onerror = () => {
-        console.warn('Image failed to load:', img.src);
-        spinner.style.display = 'none';
-        // Could add an error placeholder here
-      };
+        // Handle video load
+        mediaElement.onloadeddata = () => {
+          spinner.style.display = 'none';
+          mediaElement.classList.remove('voidgrid-video-loading');
+          mediaElement.classList.add('voidgrid-video-loaded');
+        };
+
+        // Handle load errors
+        mediaElement.onerror = () => {
+          console.warn('Video failed to load:', mediaElement.src);
+          spinner.style.display = 'none';
+          // Could add an error placeholder here
+        };
+      } else {
+        // Create image element
+        mediaElement = document.createElement('img');
+        mediaElement.src = mediaItem.url;
+        mediaElement.alt = `VoidGrid image ${i + 1}`;
+
+        // Apply hover zoom speed
+        const zoomDuration = this.options.hover.zoomSpeed || 2;
+        mediaElement.className = `w-full h-full object-cover transition-transform duration-${Math.round(zoomDuration * 1000)} group-hover:scale-110 voidgrid-image-loading`;
+
+        // Handle image load
+        mediaElement.onload = () => {
+          spinner.style.display = 'none';
+          mediaElement.classList.remove('voidgrid-image-loading');
+          mediaElement.classList.add('voidgrid-image-loaded');
+        };
+
+        // Handle load errors
+        mediaElement.onerror = () => {
+          console.warn('Image failed to load:', mediaElement.src);
+          spinner.style.display = 'none';
+          // Could add an error placeholder here
+        };
+      }
 
       // Create hover overlay
       const overlay = document.createElement('div');
@@ -285,14 +346,14 @@ class VoidGrid {
       // Add description text
       const description = document.createElement('p');
       description.className = 'text-lg font-bold text-white';
-      description.textContent = `Project ${i + 1}`;
+      description.textContent = mediaItem.title || `Project ${i + 1}`;
       overlay.appendChild(description);
 
       itemDiv.appendChild(overlay);
 
-      // Append spinner and image to itemDiv
+      // Append spinner and media to itemDiv
       itemDiv.appendChild(spinner);
-      itemDiv.appendChild(img);
+      itemDiv.appendChild(mediaElement);
 
       itemDiv.addEventListener('click', () => this.showLightbox(i));
       items.push(itemDiv);
@@ -581,7 +642,7 @@ class VoidGrid {
 
     // Get lightbox elements
     this.lightbox = document.getElementById('void-lightbox');
-    this.lightboxImage = document.getElementById('void-lightbox-image');
+    this.lightboxImageContainer = document.querySelector('.void-lightbox-image-container');
     this.lightboxDescription = document.getElementById('void-lightbox-description');
     this.lightboxPrev = document.getElementById('void-lightbox-prev');
     this.lightboxNext = document.getElementById('void-lightbox-next');
@@ -632,8 +693,39 @@ class VoidGrid {
   }
 
   updateLightboxContent() {
-    this.lightboxImage.src = this.images[this.currentImageIndex];
-    const description = this.options.lightbox.imageDescriptions[this.images[this.currentImageIndex]] || 'No description available.';
+    const currentMedia = this.mediaItems[this.currentImageIndex];
+
+    // Clear previous content
+    this.lightboxImageContainer.innerHTML = '';
+
+    if (currentMedia.type === 'video') {
+      // Create video element for lightbox
+      const video = document.createElement('video');
+      video.src = currentMedia.url;
+      video.controls = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = false; // Allow sound in lightbox
+      video.className = 'void-lightbox-video';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'contain';
+
+      this.lightboxImageContainer.appendChild(video);
+    } else {
+      // Create image element for lightbox
+      const img = document.createElement('img');
+      img.src = currentMedia.url;
+      img.alt = currentMedia.title || 'VoidGrid Image';
+      img.className = 'void-lightbox-image';
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+
+      this.lightboxImageContainer.appendChild(img);
+    }
+
+    const description = this.options.lightbox.mediaDescriptions[currentMedia.url] || 'No description available.';
     this.lightboxDescription.textContent = description;
   }
 

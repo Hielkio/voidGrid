@@ -172,3 +172,19 @@ body {
     z-index: 5;
     pointer-events: none;
 }
+
+/* Video loading and loaded states */
+.voidgrid-video-loading {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.voidgrid-video-loaded {
+    opacity: 1;
+}
+
+/* Lightbox video styling */
+.void-lightbox-video {
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
