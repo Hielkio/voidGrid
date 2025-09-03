@@ -165,35 +165,8 @@ class VoidGrid {
       }
     }
 
-    // Construct final mediaItems array with guarantee of at least one video if videos exist
-    this.mediaItems = [];
-
-    // If videos are available, ensure at least one is included
-    if (allVideos.length > 0) {
-      // Add at least one video (randomly selected)
-      const randomVideoIndex = Math.floor(Math.random() * allVideos.length);
-      this.mediaItems.push(allVideos[randomVideoIndex]);
-
-      // Remove the selected video from the pool to avoid duplicates
-      allVideos.splice(randomVideoIndex, 1);
-
-      // Add remaining videos up to a reasonable limit
-      const remainingVideoSlots = Math.min(5, allVideos.length); // Max 5 videos
-      for (let i = 0; i < remainingVideoSlots; i++) {
-        this.mediaItems.push(allVideos[i]);
-      }
-    }
-
-    // Fill remaining slots with images
-    const remainingSlots = 20 - this.mediaItems.length;
-    const imagesToAdd = Math.min(remainingSlots, allImages.length);
-
-    // Shuffle images for variety
-    const shuffledImages = [...allImages].sort(() => Math.random() - 0.5);
-
-    for (let i = 0; i < imagesToAdd; i++) {
-      this.mediaItems.push(shuffledImages[i]);
-    }
+    // Construct final mediaItems array with even distribution of videos
+    this.mediaItems = this.distributeMediaEvenly(allVideos, allImages, 20);
 
     // If no media was loaded at all, use fallback
     if (this.mediaItems.length === 0) {
@@ -206,6 +179,43 @@ class VoidGrid {
 
     // For backward compatibility, also populate this.images
     this.images = this.mediaItems.map(item => item.url);
+  }
+
+  /**
+   * Distributes videos and images evenly throughout the grid.
+   */
+  distributeMediaEvenly(videos, images, maxItems) {
+    const result = [];
+    const totalVideos = Math.min(videos.length, Math.max(1, Math.floor(maxItems * 0.3))); // Max 30% videos
+    const totalImages = maxItems - totalVideos;
+
+    // Shuffle both arrays for variety
+    const shuffledVideos = [...videos].sort(() => Math.random() - 0.5);
+    const shuffledImages = [...images].sort(() => Math.random() - 0.5);
+
+    // Select the videos and images we'll use
+    const selectedVideos = shuffledVideos.slice(0, totalVideos);
+    const selectedImages = shuffledImages.slice(0, Math.min(totalImages, images.length));
+
+    // Calculate spacing for even distribution
+    const totalItems = selectedVideos.length + selectedImages.length;
+    const videoSpacing = totalItems > 1 ? Math.floor(totalItems / selectedVideos.length) : 1;
+
+    // Create positions for videos to ensure even distribution
+    const videoPositions = [];
+    for (let i = 0; i < selectedVideos.length; i++) {
+      const position = Math.min(i * videoSpacing, totalItems - selectedVideos.length + i);
+      videoPositions.push(position);
+    }
+
+    // Build the final array with videos distributed evenly
+    const allSelectedItems = [...selectedImages];
+    videoPositions.forEach((position, index) => {
+      allSelectedItems.splice(position, 0, selectedVideos[index]);
+    });
+
+    // Trim to maxItems if needed
+    return allSelectedItems.slice(0, maxItems);
   }
 
   init() {
