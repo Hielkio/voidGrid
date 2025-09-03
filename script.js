@@ -6,6 +6,23 @@ const defaultOptions = {
   sizeVariation: true,
   // minRowHeight: '200px',
   source: null, // Path to JSON file for images
+  parallax: {
+    enabled: false,
+    speed: 0.5
+  },
+  padding: '2rem', // Padding between edge and images
+  rounded: {
+    enabled: true,
+    radius: '0.5rem'
+  },
+  background: {
+    type: 'none', // 'none', 'fixed', 'random'
+    image: null,
+    overlay: {
+      enabled: false,
+      color: 'rgba(0, 0, 0, 0.5)'
+    }
+  },
   hover: {
     overlay: 'rgba(0, 0, 0, 0.7)', // Hover overlay color (false to disable)
     descriptionPosition: 'center', // 'center', 'top', or 'bottom'
@@ -130,6 +147,9 @@ class VoidGrid {
   }
 
   init() {
+    // Apply background settings
+    this.applyBackground();
+
     // Generate initial voidgrid
     this.generateVoidGrid();
 
@@ -143,6 +163,14 @@ class VoidGrid {
 
     // Create lightbox if it doesn't exist
     this.createLightbox();
+
+    // Setup parallax if enabled
+    if (this.options.parallax.enabled) {
+      this.setupParallax();
+    }
+
+    // Setup settings panel
+    this.setupSettingsPanel();
   }
 
 
@@ -152,6 +180,7 @@ class VoidGrid {
   generateVoidGrid() {
     this.container.innerHTML = ''; // Clear the container
     this.container.style.gap = this.options.gap;
+    this.container.style.padding = this.options.padding;
 
     // Set the CSS variable for the minimum row height
     this.container.style.setProperty('--min-row-height', this.options.minRowHeight);
@@ -171,7 +200,10 @@ class VoidGrid {
 
     for (let i = 0; i < this.images.length; i++) {
       const itemDiv = document.createElement('div');
-      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer ${this.options.border}`;
+      itemDiv.className = `voidgrid-item overflow-hidden relative shadow-lg group cursor-pointer ${this.options.border}`;
+      if (this.options.rounded.enabled) {
+        itemDiv.style.borderRadius = this.options.rounded.radius;
+      }
       itemDiv.setAttribute('data-index', i);
 
       let classNameModifier = '';
@@ -344,6 +376,187 @@ class VoidGrid {
       },
       markers: false // For debugging, set to true
     });
+  }
+
+  /**
+   * Sets up parallax scrolling effect.
+   */
+  setupParallax() {
+    const items = gsap.utils.toArray(".voidgrid-item", this.container);
+    items.forEach((item, index) => {
+      gsap.to(item, {
+        yPercent: -50 * this.options.parallax.speed,
+        ease: "none",
+        scrollTrigger: {
+          trigger: item,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+    });
+  }
+
+  /**
+   * Applies background settings.
+   */
+  applyBackground() {
+    const section = this.container.closest('.page-section');
+    if (!section) return;
+
+    // Remove existing background elements
+    const existingBg = section.querySelector('.voidgrid-background');
+    if (existingBg) existingBg.remove();
+
+    if (this.options.background.type === 'none') return;
+
+    // Create background container
+    const bgContainer = document.createElement('div');
+    bgContainer.className = 'voidgrid-background absolute inset-0 z-0';
+
+    let bgImage = this.options.background.image;
+    if (this.options.background.type === 'random') {
+      bgImage = this.images[Math.floor(Math.random() * this.images.length)];
+    }
+
+    if (bgImage) {
+      bgContainer.style.backgroundImage = `url(${bgImage})`;
+      bgContainer.style.backgroundSize = 'cover';
+      bgContainer.style.backgroundPosition = 'center';
+      bgContainer.style.backgroundAttachment = 'fixed';
+    }
+
+    // Add overlay if enabled
+    if (this.options.background.overlay.enabled) {
+      const overlay = document.createElement('div');
+      overlay.className = 'voidgrid-background-overlay absolute inset-0';
+      overlay.style.backgroundColor = this.options.background.overlay.color;
+      bgContainer.appendChild(overlay);
+    }
+
+    section.appendChild(bgContainer);
+  }
+
+  /**
+   * Sets up the settings panel.
+   */
+  setupSettingsPanel() {
+    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const applySettings = document.getElementById('applySettings');
+
+    if (!settingsToggle || !settingsPanel) return;
+
+    // Toggle panel visibility
+    settingsToggle.addEventListener('click', () => {
+      settingsPanel.classList.toggle('hidden');
+    });
+
+    // Apply settings
+    applySettings.addEventListener('click', () => {
+      this.applySettingsFromPanel();
+      settingsPanel.classList.add('hidden');
+    });
+
+    // Update displays
+    this.updateSettingsDisplays();
+
+    // Set initial panel values
+    this.setPanelValues();
+  }
+
+  /**
+   * Updates the settings panel displays.
+   */
+  updateSettingsDisplays() {
+    const paddingValue = document.getElementById('paddingValue');
+    const paddingDisplay = document.getElementById('paddingDisplay');
+    const roundedRadius = document.getElementById('roundedRadius');
+    const roundedDisplay = document.getElementById('roundedDisplay');
+
+    if (paddingValue && paddingDisplay) {
+      paddingValue.addEventListener('input', () => {
+        paddingDisplay.textContent = paddingValue.value + 'rem';
+      });
+    }
+
+    if (roundedRadius && roundedDisplay) {
+      roundedRadius.addEventListener('input', () => {
+        roundedDisplay.textContent = roundedRadius.value + 'rem';
+      });
+    }
+  }
+
+  /**
+   * Applies settings from the panel to the options.
+   */
+  applySettingsFromPanel() {
+    // Parallax
+    this.options.parallax.enabled = document.getElementById('parallaxEnabled').checked;
+    this.options.parallax.speed = parseFloat(document.getElementById('parallaxSpeed').value);
+
+    // Padding
+    this.options.padding = document.getElementById('paddingValue').value + 'rem';
+
+    // Rounded
+    this.options.rounded.enabled = document.getElementById('roundedEnabled').checked;
+    this.options.rounded.radius = document.getElementById('roundedRadius').value + 'rem';
+
+    // Background
+    this.options.background.type = document.getElementById('backgroundType').value;
+
+    // Overlay
+    this.options.background.overlay.enabled = document.getElementById('overlayEnabled').checked;
+    const color = document.getElementById('overlayColor').value;
+    const opacity = document.getElementById('overlayOpacity').value;
+    const rgb = this.hexToRgb(color);
+    this.options.background.overlay.color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+
+    // Reinitialize
+    this.applyBackground();
+    this.generateVoidGrid();
+    if (this.options.parallax.enabled) {
+      this.setupParallax();
+    }
+  }
+
+  /**
+   * Converts hex color to RGB object.
+   */
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+  }
+
+  /**
+   * Sets the panel values based on current options.
+   */
+  setPanelValues() {
+    // Parallax
+    document.getElementById('parallaxEnabled').checked = this.options.parallax.enabled;
+    document.getElementById('parallaxSpeed').value = this.options.parallax.speed;
+
+    // Padding
+    const paddingVal = parseFloat(this.options.padding);
+    document.getElementById('paddingValue').value = paddingVal;
+    document.getElementById('paddingDisplay').textContent = paddingVal + 'rem';
+
+    // Rounded
+    document.getElementById('roundedEnabled').checked = this.options.rounded.enabled;
+    const roundedVal = parseFloat(this.options.rounded.radius);
+    document.getElementById('roundedRadius').value = roundedVal;
+    document.getElementById('roundedDisplay').textContent = roundedVal + 'rem';
+
+    // Background
+    document.getElementById('backgroundType').value = this.options.background.type;
+
+    // Overlay
+    document.getElementById('overlayEnabled').checked = this.options.background.overlay.enabled;
+    // For color and opacity, we might need to parse the rgba, but for simplicity, keep defaults
   }
 
   createLightbox() {

@@ -14,6 +14,14 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 </head>
 <body>
+    <!-- Settings Toggle Button -->
+    <button id="settingsToggle" class="fixed top-4 right-16 z-50 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300" title="Settings">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+    </button>
+
     <!-- Theme Toggle Button -->
     <button id="themeToggle" class="fixed top-4 right-4 z-50 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300" title="Toggle Theme">
         <svg id="sunIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +31,63 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
         </svg>
     </button>
+
+    <!-- Settings Panel -->
+    <div id="settingsPanel" class="fixed top-16 right-4 z-40 bg-gray-800 text-white p-4 rounded-lg shadow-lg hidden max-w-sm">
+        <h3 class="text-lg font-bold mb-4">VoidGrid Settings</h3>
+
+        <!-- Parallax -->
+        <div class="mb-4">
+            <label class="flex items-center mb-2">
+                <input type="checkbox" id="parallaxEnabled" class="mr-2">
+                Enable Parallax
+            </label>
+            <label class="block text-sm mb-1">Parallax Speed:</label>
+            <input type="range" id="parallaxSpeed" min="0.1" max="2" step="0.1" value="0.5" class="w-full">
+        </div>
+
+        <!-- Padding -->
+        <div class="mb-4">
+            <label class="block text-sm mb-1">Padding:</label>
+            <input type="range" id="paddingValue" min="0" max="5" step="0.25" value="2" class="w-full">
+            <span id="paddingDisplay" class="text-xs">2rem</span>
+        </div>
+
+        <!-- Rounded Corners -->
+        <div class="mb-4">
+            <label class="flex items-center mb-2">
+                <input type="checkbox" id="roundedEnabled" checked class="mr-2">
+                Enable Rounded Corners
+            </label>
+            <label class="block text-sm mb-1">Corner Radius:</label>
+            <input type="range" id="roundedRadius" min="0" max="2" step="0.1" value="0.5" class="w-full">
+            <span id="roundedDisplay" class="text-xs">0.5rem</span>
+        </div>
+
+        <!-- Background -->
+        <div class="mb-4">
+            <label class="block text-sm mb-1">Background Type:</label>
+            <select id="backgroundType" class="w-full bg-gray-700 p-1 rounded">
+                <option value="none">None</option>
+                <option value="fixed">Fixed Image</option>
+                <option value="random">Random Image</option>
+            </select>
+        </div>
+
+        <!-- Overlay -->
+        <div class="mb-4">
+            <label class="flex items-center mb-2">
+                <input type="checkbox" id="overlayEnabled" class="mr-2">
+                Enable Overlay
+            </label>
+            <label class="block text-sm mb-1">Overlay Color:</label>
+            <input type="color" id="overlayColor" value="#000000" class="w-full">
+            <label class="block text-sm mb-1">Overlay Opacity:</label>
+            <input type="range" id="overlayOpacity" min="0" max="1" step="0.1" value="0.5" class="w-full">
+        </div>
+
+        <button id="applySettings" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Apply Settings</button>
+    </div>
 </head>
 <body>
 
