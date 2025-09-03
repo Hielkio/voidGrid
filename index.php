@@ -41,7 +41,15 @@ function scanDirectoryForMedia($directory, $basePath = '') {
 
             if (in_array($extension, $supportedExtensions)) {
                 $type = in_array($extension, ['mp4', 'webm', 'avi']) ? 'video' : 'image';
-                $url = $basePath . $file;
+
+                // Generate correct URL based on directory structure
+                if (strpos($directory, '../') === 0) {
+                    // Parent directory - adjust URL accordingly
+                    $url = '../' . ltrim($basePath . $file, './');
+                } else {
+                    // Local directory
+                    $url = $basePath . $file;
+                }
 
                 $mediaFiles[] = [
                     'type' => $type,
@@ -118,7 +126,6 @@ $mediaItemsJson = json_encode($mediaItems);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoidGrid - Multi-Source Media Gallery</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">

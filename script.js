@@ -33,6 +33,10 @@ const defaultOptions = {
     gridMuted: true, // Videos muted in grid overview
     lightboxEnabled: true // Sound enabled in lightbox
   },
+  downloads: {
+    autoDownloadVisible: false, // Disable automatic downloads by default
+    enableBatchDownload: true   // Allow manual batch downloads
+  },
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -128,6 +132,13 @@ class VoidGrid {
       console.log('First item:', this.options.phpMediaData[0]);
       this.mediaItems = this.options.phpMediaData;
       this.images = this.mediaItems.map(item => item.url);
+
+      // Initialize lightbox descriptions for PHP data
+      this.options.lightbox.mediaDescriptions = {};
+      this.mediaItems.forEach(item => {
+        this.options.lightbox.mediaDescriptions[item.url] = item.title || 'Media';
+      });
+
       console.log('Mapped URLs:', this.images);
       this.init();
     } else if (this.options.sources && this.options.sources.length > 0) {
