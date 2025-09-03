@@ -1,14 +1,18 @@
 [
   {
-    "video_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     "title": "Ocean Life - Coral Reef"
   },
   {
-    "video_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     "title": "Ocean Life - Deep Sea Creatures"
   },
   {
     "image_url": "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800",
     "title": "Ocean Life - Tropical Fish"
+  },
+  {
+    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "title": "Ocean Life - Marine Life"
   }
 ]

@@ -140,7 +140,7 @@ class VoidGrid {
         const data = await response.json();
 
         // Process each item in the JSON
-        data.forEach(item => {
+        data.forEach((item, index) => {
           if (item.image_url) {
             // It's an image
             this.mediaItems.push({
@@ -164,9 +164,14 @@ class VoidGrid {
       }
     }
 
+    // Limit to first 20 items to prevent performance issues
+    if (this.mediaItems.length > 20) {
+      this.mediaItems = this.mediaItems.slice(0, 20);
+    }
+
     // Fallback to default images if no media loaded
     if (this.mediaItems.length === 0) {
-      this.mediaItems = this.options.images.map(url => ({
+      this.mediaItems = this.options.images.slice(0, 12).map(url => ({
         type: 'image',
         url: url,
         title: 'Default Image'
@@ -202,6 +207,9 @@ class VoidGrid {
 
     // Setup settings panel
     this.setupSettingsPanel();
+
+    // Setup video autoplay on user interaction
+    this.setupVideoAutoplay();
   }
 
 
@@ -217,7 +225,7 @@ class VoidGrid {
     this.container.style.setProperty('--min-row-height', this.options.minRowHeight);
 
     const items = [];
-    const layout = this.getBalancedLayout(this.images.length);
+    const layout = this.getBalancedLayout(this.mediaItems.length);
     // const colSpanClasses = ['w-2x', 'w-3x'];
     // const rowSpanClasses = ['h-2x', 'h-3x'];
     // const numLargeItems = Math.floor(this.images.length * 0.3);
@@ -285,6 +293,17 @@ class VoidGrid {
           spinner.style.display = 'none';
           mediaElement.classList.remove('voidgrid-video-loading');
           mediaElement.classList.add('voidgrid-video-loaded');
+
+          // Try to play the video
+          const playPromise = mediaElement.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Video started playing successfully
+            }).catch(error => {
+              // Autoplay failed, video will show play button
+              console.log('Video autoplay failed, user interaction required');
+            });
+          }
         };
 
         // Handle load errors
@@ -496,6 +515,36 @@ class VoidGrid {
     }
 
     section.appendChild(bgContainer);
+  }
+
+  /**
+   * Sets up video autoplay handling.
+   */
+  setupVideoAutoplay() {
+    let userInteracted = false;
+
+    const startVideos = () => {
+      if (userInteracted) return;
+      userInteracted = true;
+
+      const videos = this.container.querySelectorAll('video');
+      videos.forEach(video => {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // Video started playing after user interaction
+          }).catch(error => {
+            // Video still failed to play
+          });
+        }
+      });
+    };
+
+    // Listen for user interactions
+    const events = ['click', 'touchstart', 'keydown', 'scroll'];
+    events.forEach(event => {
+      document.addEventListener(event, startVideos, { once: true });
+    });
   }
 
   /**
