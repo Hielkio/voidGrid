@@ -45,7 +45,9 @@ function scanDirectoryForMedia($directory, $basePath = '') {
                 // Generate correct URL based on directory structure
                 if (strpos($directory, '../') === 0) {
                     // Parent directory - adjust URL accordingly
-                    $url = '../' . ltrim($basePath . $file, './');
+                    // Remove the '../' prefix and add proper path
+                    $cleanPath = ltrim($basePath . $file, './');
+                    $url = '../assets/images/' . $cleanPath;
                 } else {
                     // Local directory
                     $url = $basePath . $file;
@@ -194,6 +196,18 @@ $mediaItemsJson = json_encode($mediaItems);
             <label class="flex items-center mb-2">
                 <input type="checkbox" id="lightboxSoundEnabled" checked class="mr-2">
                 Enable Sound in Lightbox
+            </label>
+        </div>
+
+        <!-- Download Settings -->
+        <div class="mb-4">
+            <label class="flex items-center mb-2">
+                <input type="checkbox" id="autoDownloadVisible" class="mr-2">
+                Auto-download Visible Items
+            </label>
+            <label class="flex items-center mb-2">
+                <input type="checkbox" id="enableBatchDownload" checked class="mr-2">
+                Enable Batch Download Button
             </label>
         </div>
 
