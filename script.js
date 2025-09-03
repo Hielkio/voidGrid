@@ -733,6 +733,7 @@ class VoidGrid {
     this.lightboxNext = document.getElementById('void-lightbox-next');
     this.closeLightboxBtn = document.getElementById('void-close-lightbox');
     this.lightboxOverlay = document.querySelector('.void-lightbox-overlay');
+    this.currentLightboxMedia = null; // Track current media element in lightbox
 
     // Set up event listeners
     this.closeLightboxBtn.addEventListener('click', () => this.hideLightbox());
@@ -740,7 +741,7 @@ class VoidGrid {
     this.lightboxNext.addEventListener('click', () => this.goToNextImage());
     this.lightboxPrev.addEventListener('click', () => this.goToPrevImage());
 
-    // Swipe logic
+    // Swipe logic for lightbox
     let touchstartX = 0;
     let touchendX = 0;
 
@@ -753,11 +754,12 @@ class VoidGrid {
       }
     };
 
-    this.lightboxImage.addEventListener('touchstart', e => {
+    // Add touch listeners to the lightbox content area
+    this.lightbox.addEventListener('touchstart', e => {
       touchstartX = e.changedTouches[0].screenX;
     });
 
-    this.lightboxImage.addEventListener('touchend', e => {
+    this.lightbox.addEventListener('touchend', e => {
       touchendX = e.changedTouches[0].screenX;
       handleGesture();
     });
@@ -797,6 +799,7 @@ class VoidGrid {
       video.style.objectFit = 'contain';
 
       this.lightboxImageContainer.appendChild(video);
+      this.currentLightboxMedia = video;
     } else {
       // Create image element for lightbox
       const img = document.createElement('img');
@@ -808,6 +811,7 @@ class VoidGrid {
       img.style.objectFit = 'contain';
 
       this.lightboxImageContainer.appendChild(img);
+      this.currentLightboxMedia = img;
     }
 
     const description = this.options.lightbox.mediaDescriptions[currentMedia.url] || 'No description available.';
@@ -815,29 +819,32 @@ class VoidGrid {
   }
 
   goToNextImage() {
-    const nextIndex = (this.currentImageIndex + 1) % this.images.length;
+    const nextIndex = (this.currentImageIndex + 1) % this.mediaItems.length;
     this.transitionImage(nextIndex, 1);
   }
 
   goToPrevImage() {
-    const prevIndex = (this.currentImageIndex - 1 + this.images.length) % this.images.length;
+    const prevIndex = (this.currentImageIndex - 1 + this.mediaItems.length) % this.mediaItems.length;
     this.transitionImage(prevIndex, -1);
   }
 
   transitionImage(newIndex, direction) {
-    gsap.to(this.lightboxImage, {
-      x: -direction * 100,
+    // Animate the container out
+    gsap.to(this.lightboxImageContainer, {
+      x: -direction * 50,
       opacity: 0,
+      scale: 0.95,
       duration: 0.3,
       onComplete: () => {
         this.currentImageIndex = newIndex;
         this.updateLightboxContent();
-        gsap.fromTo(this.lightboxImage, {
-          x: direction * 100,
-          opacity: 0
-        }, {
+
+        // Reset container position and animate in
+        gsap.set(this.lightboxImageContainer, { x: direction * 50, opacity: 0, scale: 0.95 });
+        gsap.to(this.lightboxImageContainer, {
           x: 0,
           opacity: 1,
+          scale: 1,
           duration: 0.3
         });
       }
