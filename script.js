@@ -38,66 +38,34 @@ const defaultOptions = {
     enableBatchDownload: true   // Allow manual batch downloads
   },
   images: [
-    "https://images.alphacoders.com/605/thumb-1920-605592.png",
-    "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
-    "https://images6.alphacoders.com/134/thumb-1920-1345576.jpeg",
-    "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645907.jpg?t=st=1726886402~exp=1726890002~hmac=e43e19cffc3630f1cdd03dcb4533a23b21344ac660d1ac762568d1161d4bae7a&w=740",
-    "https://images7.alphacoders.com/611/thumb-1920-611138.png",
-    "https://images3.alphacoders.com/132/thumb-1920-1328396.png",
-    "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645928.jpg?t=st=1726886405~exp=1726890005~hmac=95b03ab38c4d3bb7c5e9fa8bdbfad8243aa5f83854bb749ae511412a5e63cb32&w=740",
-    "https://images7.alphacoders.com/303/thumb-1920-303042.png",
-    "https://img.freepik.com/free-photo/anime-night-sky-illustration_23-2151684331.jpg?t=st=1726886396~exp=1726889996~hmac=ebc1240842fe109bbb9f9fd955f99cdc781f6b66390ec563ec816b2caa985234&w=740",
-    "https://images.alphacoders.com/736/thumb-1920-736461.png",
-    "https://images6.alphacoders.com/629/thumb-1920-629544.jpg",
-    "https://images.alphacoders.com/134/thumb-1920-1343747.png",
-    "https://img.freepik.com/premium-photo/warm-bokeh-architecture-outdoors-scenery_53876-227196.jpg?w=740",
-    "https://images4.alphacoders.com/474/thumb-1920-47438.png",
-    "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645906.jpg?t=st=1726886398~exp=1726889998~hmac=e6455fa0ea50a285ff0863953315946eea95bd58dc48eb6e6e6cb1c7a7b4fae0&w=740",
-    "https://images2.alphacoders.com/606/thumb-1920-606275.jpg",
-    "https://images4.alphacoders.com/973/thumb-1920-973967.jpg",
-    "https://img.freepik.com/premium-photo/person-is-outdoors-looking-sky_777271-21290.jpg?w=740",
-    "https://images3.alphacoders.com/144/thumb-1920-144565.jpg",
-    "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645915.jpg?t=st=1726886396~exp=1726889996~hmac=d651aef964bcb6fdf0ac9332add43ba548b0f4a3542d03c6ae9a0c6895d3d578&w=740",
-    "https://images.alphacoders.com/134/thumb-1920-1343746.png",
-    "https://images.alphacoders.com/134/thumb-1920-1345040.png",
-    "https://img.freepik.com/free-photo/halloween-scene-illustration-anime-style_23-2151794334.jpg?t=st=1726886398~exp=1726889998~hmac=234af4f2da54121aae68a2d2bd4033bfe7dfd97868e2e501ac70df29425b9f2b&w=740",
-    "https://images3.alphacoders.com/135/thumb-1920-1353834.jpeg",
-    "https://images5.alphacoders.com/134/thumb-1920-1343507.jpeg",
-    "https://img.freepik.com/premium-photo/samurai-cartoon-toy-representation_53876-256120.jpg?w=740",
-    "https://images.alphacoders.com/134/thumb-1920-1348051.png",
-    "https://img.freepik.com/free-photo/beautiful-clouds-digital-art_23-2151105777.jpg?t=st=1726886379~exp=1726889979~hmac=39ba6e00ebfb4e14c02812858e09e0c27c10734b31735482a4e69b8c0d17b533&w=740"
+    "https://images.pexels.com/photos/631317/pexels-photo-631317.jpeg",
+    "https://images.pexels.com/photos/618960/pexels-photo-618960.jpeg",
+    "https://images.pexels.com/photos/1049500/pexels-photo-1049500.jpeg",
+    "https://images.pexels.com/photos/3561109/pexels-photo-3561109.jpeg",
+    "https://images.pexels.com/photos/2960007/pexels-photo-2960007.jpeg",
+    "https://images.pexels.com/photos/3347323/pexels-photo-3347323.jpeg",
+    "https://images.pexels.com/photos/2965136/pexels-photo-2965136.jpeg",
+    "https://images.pexels.com/photos/2956401/pexels-photo-2956401.jpeg",
+    "https://images.pexels.com/photos/3828761/pexels-photo-3828761.jpeg",
+    "https://images.pexels.com/photos/2971038/pexels-photo-2971038.jpeg",
+    "https://images.pexels.com/photos/33750559/pexels-photo-33750559.jpeg",
+    "https://images.pexels.com/photos/33750560/pexels-photo-33750560.jpeg"
   ],
   lightbox: {
     overlayColor: 'rgba(0, 0, 0, 0.9)',
     imageDescriptions: {
-      "https://images.alphacoders.com/605/thumb-1920-605592.png": "A majestic landscape with mountains and clouds.",
-      "https://images.alphacoders.com/131/thumb-1920-1311951.jpg": "A starry night sky over a serene village.",
-      "https://images6.alphacoders.com/134/thumb-1920-1345576.jpeg": "A tranquil forest with a ray of sunlight.",
-      "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645907.jpg?t=st=1726886402~exp=1726890002~hmac=e43e19cffc3630f1cdd03dcb4533a23b21344ac660d1ac762568d1161d4bae7a&w=740": "An animated landscape with a prominent moon.",
-      "https://images7.alphacoders.com/611/thumb-1920-611138.png": "A cool, urban night scene with neon lights.",
-      "https://images3.alphacoders.com/132/thumb-1920-1328396.png": "A digital painting of a cloudy sky.",
-      "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645928.jpg?t=st=1726886405~exp=1726890005~hmac=95b03ab38c4d3bb7c5e9fa8bdbfad8243aa5f83854bb749ae511412a5e63cb32&w=740": "Another animated moonlit landscape.",
-      "https://images7.alphacoders.com/303/thumb-1920-303042.png": "A classic samurai warrior in a dynamic pose.",
-      "https://img.freepik.com/free-photo/anime-night-sky-illustration_23-2151684331.jpg?t=st=1726886396~exp=1726889996~hmac=ebc1240842fe109bbb9f9fd955f99cdc781f6b66390ec563ec816b2caa985234&w=740": "An anime-style night sky illustration.",
-      "https://images.alphacoders.com/736/thumb-1920-736461.png": "A detailed illustration of a futuristic building.",
-      "https://images6.alphacoders.com/629/thumb-1920-629544.jpg": "A scenic view of a mountain with fog.",
-      "https://images.alphacoders.com/134/thumb-1920-1343747.png": "A cyberpunk city at night with flying cars.",
-      "https://img.freepik.com/premium-photo/warm-bokeh-architecture-outdoors-scenery_53876-227196.jpg?w=740": "Bokeh effect on an outdoor architectural shot.",
-      "https://images4.alphacoders.com/474/thumb-1920-47438.png": "A fantasy landscape with floating islands.",
-      "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645906.jpg?t=st=1726886398~exp=1726889998~hmac=e6455fa0ea50a285ff0863953315946eea95bd58dc48eb6e6e6cb1c7a7b4fae0&w=740": "An anime scene with a gentle moon.",
-      "https://images2.alphacoders.com/606/thumb-1920-606275.jpg": "An atmospheric scene of a train at a station.",
-      "https://images4.alphacoders.com/973/thumb-1920-973967.jpg": "A digital illustration of a serene natural landscape.",
-      "https://img.freepik.com/premium-photo/person-is-outdoors-looking-sky_777271-21290.jpg?w=740": "A person looking at a scenic sky.",
-      "https://images3.alphacoders.com/144/thumb-1920-144565.jpg": "A striking close-up of a tiger.",
-      "https://img.freepik.com/free-photo/anime-moon-landscape_23-2151645915.jpg?t=st=1726886396~exp=1726889996~hmac=d651aef964bcb6fdf0ac9332add43ba548b0f4a3542d03c6ae9a0c6895d3d578&w=740": "A stylized landscape with a large moon.",
-      "https://images.alphacoders.com/134/thumb-1920-1343746.png": "A bustling street in a futuristic city.",
-      "https://images.alphacoders.com/134/thumb-1920-1345040.png": "A beautiful sci-fi city with a flying vehicle.",
-      "https://img.freepik.com/free-photo/halloween-scene-illustration-anime-style_23-2151794334.jpg?t=st=1726886398~exp=1726889998~hmac=234af4f2da54121aae68a2d2bd4033bfe7dfd97868e2e501ac70df29425b9f2b&w=740": "An animated Halloween illustration.",
-      "https://images3.alphacoders.com/135/thumb-1920-1353834.jpeg": "A detailed illustration of a fantasy scene with a moon.",
-      "https://images5.alphacoders.com/134/thumb-1920-1343507.jpeg": "An animated landscape with colorful clouds.",
-      "https://img.freepik.com/premium-photo/samurai-cartoon-toy-representation_53876-256120.jpg?w=740": "A stylized samurai character.",
-      "https://images.alphacoders.com/134/thumb-1920-1348051.png": "A stunning space scene with a planet and stars.",
-      "https://img.freepik.com/free-photo/beautiful-clouds-digital-art_23-2151105777.jpg?t=st=1726886379~exp=1726889979~hmac=39ba6e00ebfb4e14c02812858e09e0c27c10734b31735482a4e69b8c0d17b533&w=740": "Digital art of beautiful clouds."
+      "https://images.pexels.com/photos/631317/pexels-photo-631317.jpeg": "Africa photo from Pexels - A herd of African elephants walking through Kruger National Park, South Africa.",
+      "https://images.pexels.com/photos/618960/pexels-photo-618960.jpeg": "Africa photo from Pexels - Close-up monochrome photo of an African buffalo in Kenya's wild landscape.",
+      "https://images.pexels.com/photos/1049500/pexels-photo-1049500.jpeg": "Africa photo from Pexels - A tall giraffe wanders the vast savanna of Kenya, showcasing its unique elegance amidst the wild.",
+      "https://images.pexels.com/photos/3561109/pexels-photo-3561109.jpeg": "Africa photo from Pexels - Fishermen navigating a wooden boat on the vibrant Elmina coast, showcasing traditional fishing culture in Ghana.",
+      "https://images.pexels.com/photos/2960007/pexels-photo-2960007.jpeg": "Africa photo from Pexels - Stunning aerial view of Cape Town's bustling harbor at twilight with ships and waterfront buildings.",
+      "https://images.pexels.com/photos/3347323/pexels-photo-3347323.jpeg": "Africa photo from Pexels - Group of African penguins on rocky shore at Betty's Bay with ocean and mountains in the background.",
+      "https://images.pexels.com/photos/2965136/pexels-photo-2965136.jpeg": "Africa photo from Pexels - Scenic view of waves crashing on the rocky shore at Pearly Beach, South Africa.",
+      "https://images.pexels.com/photos/2956401/pexels-photo-2956401.jpeg": "Africa photo from Pexels - A small bird perched on a cliff edge overlooking the ocean in Cape Town, South Africa.",
+      "https://images.pexels.com/photos/3828761/pexels-photo-3828761.jpeg": "Africa photo from Pexels - A mother and baby elephant roam the African savanna, showcasing wildlife in its natural habitat.",
+      "https://images.pexels.com/photos/2971038/pexels-photo-2971038.jpeg": "Africa photo from Pexels - Captured at sunset, this tranquil scene showcases fishing boats reflecting on the calm waters of Hout Bay Harbor.",
+      "https://images.pexels.com/photos/33750559/pexels-photo-33750559.jpeg": "Africa photo from Pexels - ",
+      "https://images.pexels.com/photos/33750560/pexels-photo-33750560.jpeg": "Africa photo from Pexels - "
     }
   }
 };
@@ -114,7 +82,6 @@ class VoidGrid {
 
     this.options = { ...defaultOptions, ...options };
     this.currentImageIndex = 0;
-    this.localMediaCache = new Map(); // Initialize cache
 
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
@@ -387,75 +354,9 @@ class VoidGrid {
   }
 
   /**
-   * Sets up smart media loading with local file checking.
-   */
-  setupSmartMediaLoading() {
-    // Pre-check local files for current media items
-    this.checkLocalFilesAvailability();
-  }
-
-  /**
-   * Checks which media files are available locally.
-   */
-  async checkLocalFilesAvailability() {
-    if (!this.mediaItems) return;
-
-    for (const item of this.mediaItems) {
-      const localPath = this.getLocalPath(item);
-      if (localPath) {
-        const isAvailable = await this.checkLocalFile(localPath);
-        this.localMediaCache.set(item.url, {
-          localPath: isAvailable ? localPath : null,
-          checked: true
-        });
-      }
-    }
-  }
-
-  /**
-   * Checks if a local file exists by trying to load it.
-   */
-  async checkLocalFile(localPath) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = localPath;
-
-      // Timeout after 3 seconds
-      setTimeout(() => resolve(false), 3000);
-    });
-  }
-
-  /**
-   * Gets the local path for a media item.
-   */
-  getLocalPath(item) {
-    if (!item.title) return null;
-
-    const folder = item.type === 'video' ? 'videos' : 'images';
-    const extension = item.type === 'video' ? 'mp4' : 'jpg';
-    const filename = `${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${extension}`;
-
-    return `media/${folder}/${filename}`;
-  }
-
-  /**
-   * Gets the best available URL for a media item.
-   * For PHP-generated data, just return the URL directly.
-   * For dynamically loaded data, check cache for local versions.
+   * Gets the URL for a media item.
    */
   getBestMediaUrl(item) {
-    // If we have PHP-generated data, just return the URL
-    if (this.options.phpMediaData) {
-      return item.url;
-    }
-
-    // For dynamically loaded data, check cache
-    const cacheEntry = this.localMediaCache.get(item.url);
-    if (cacheEntry && cacheEntry.localPath) {
-      return cacheEntry.localPath;
-    }
     return item.url;
   }
 
@@ -594,9 +495,6 @@ class VoidGrid {
 
     // Setup video autoplay on user interaction
     this.setupVideoAutoplay();
-
-    // Setup smart media loading
-    this.setupSmartMediaLoading();
 
 
   }

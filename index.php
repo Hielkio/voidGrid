@@ -7,8 +7,8 @@ $config = [
     'sources' => [
         'sources/africa.json',           // JSON file
         'sources/ocean-life-video.json', // JSON with videos
-        '../assets/images/portfolio',    // Directory with images (relative to voidGrid)
-        '../assets/images/hq'            // Another directory (relative to voidGrid)
+        '../assets/images/portfolio',     // Directory with images (relative to voidGrid)
+        '../assets/images/hq'             // Another directory (relative to voidGrid)
     ],
     'maxItems' => 50,  // Maximum items to load
     'supportedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'avi']
