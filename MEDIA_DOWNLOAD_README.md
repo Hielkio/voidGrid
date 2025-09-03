@@ -26,16 +26,32 @@ voidGrid/
 
 ## 🚀 Hoe te Gebruiken
 
-### Stap 1: Media Downloaden
+### Belangrijke Opmerking over Downloads
+**Browser Download Dialogs**: Voor beveiligingsredenen toont de browser altijd download dialogen. Dit is normaal gedrag en kan niet worden omzeild in webapplicaties.
+
+### Stap 1: Media Downloaden (Optioneel)
 
 1. **Open je VoidGrid project** in de browser
-2. **Klik op de groene download knop** (📁) linksboven
-3. **Bevestig de download** van alle media bestanden
+2. **Klik op de groene download knop** (📁) linksboven (indien ingeschakeld)
+3. **Bevestig de download** van alle media bestanden in de browser dialogs
 4. **Wacht tot alle downloads voltooid zijn**
 
 De downloads worden automatisch georganiseerd in:
 - `media/videos/` voor video bestanden
 - `media/images/` voor image bestanden
+
+### Automatische Downloads Uitschakelen
+
+Standaard zijn automatische downloads **uitgeschakeld** om intrusive dialogs te voorkomen:
+
+```javascript
+new VoidGrid("#container", {
+  downloads: {
+    autoDownloadVisible: false,  // Geen automatische downloads
+    enableBatchDownload: true    // Handmatige downloads toegestaan
+  }
+});
+```
 
 ### Stap 2: Lokale Bronnen Gebruiken
 

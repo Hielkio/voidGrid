@@ -109,9 +109,7 @@ class VoidGrid {
     }
 
     this.options = { ...defaultOptions, ...options };
-    this.images = this.options.images;
     this.currentImageIndex = 0;
-    this.localMediaCache = new Map(); // Cache for local file existence checks
 
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
@@ -123,7 +121,13 @@ class VoidGrid {
       this.container.parentElement.appendChild(this.toggleButton);
     }
 
-    if (this.options.sources && this.options.sources.length > 0) {
+    // Use PHP-generated media data if available
+    if (this.options.phpMediaData) {
+      this.mediaItems = this.options.phpMediaData;
+      this.images = this.mediaItems.map(item => item.url);
+      this.init();
+    } else if (this.options.sources && this.options.sources.length > 0) {
+      // Fallback to loading from sources (for backward compatibility)
       this.loadImagesFromSources().then(() => {
         this.init();
       });
@@ -198,10 +202,13 @@ class VoidGrid {
    * Creates a download button for batch downloading media.
    */
   createDownloadButton() {
+    // Only create download button if batch downloads are enabled
+    if (!this.options.downloads.enableBatchDownload) return;
+
     const downloadBtn = document.createElement('button');
     downloadBtn.id = 'mediaDownloadBtn';
     downloadBtn.className = 'fixed top-4 left-4 z-50 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300';
-    downloadBtn.title = 'Download All Media';
+    downloadBtn.title = 'Download All Media (will show browser download dialogs)';
     downloadBtn.innerHTML = `
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -566,11 +573,7 @@ class VoidGrid {
     // Setup smart media loading
     this.setupSmartMediaLoading();
 
-    // Setup automatic download of visible items
-    this.setupAutoDownloadVisible();
 
-    // Setup media download manager
-    this.setupMediaDownloadManager();
   }
 
 
@@ -966,6 +969,10 @@ class VoidGrid {
     this.options.sound.gridMuted = document.getElementById('gridMuted').checked;
     this.options.sound.lightboxEnabled = document.getElementById('lightboxSoundEnabled').checked;
 
+    // Download settings
+    this.options.downloads.autoDownloadVisible = document.getElementById('autoDownloadVisible').checked;
+    this.options.downloads.enableBatchDownload = document.getElementById('enableBatchDownload').checked;
+
     // Parallax
     this.options.parallax.enabled = document.getElementById('parallaxEnabled').checked;
     this.options.parallax.speed = parseFloat(document.getElementById('parallaxSpeed').value);
@@ -993,6 +1000,24 @@ class VoidGrid {
     if (this.options.parallax.enabled) {
       this.setupParallax();
     }
+
+    // Handle download button visibility
+    this.updateDownloadButtonVisibility();
+  }
+
+  /**
+   * Updates the visibility of the download button based on settings.
+   */
+  updateDownloadButtonVisibility() {
+    const downloadBtn = document.getElementById('mediaDownloadBtn');
+
+    if (this.options.downloads.enableBatchDownload && !downloadBtn) {
+      // Create button if it should exist but doesn't
+      this.createDownloadButton();
+    } else if (!this.options.downloads.enableBatchDownload && downloadBtn) {
+      // Remove button if it shouldn't exist but does
+      downloadBtn.remove();
+    }
   }
 
   /**
@@ -1014,6 +1039,10 @@ class VoidGrid {
     // Sound settings
     document.getElementById('gridMuted').checked = this.options.sound.gridMuted;
     document.getElementById('lightboxSoundEnabled').checked = this.options.sound.lightboxEnabled;
+
+    // Download settings
+    document.getElementById('autoDownloadVisible').checked = this.options.downloads.autoDownloadVisible;
+    document.getElementById('enableBatchDownload').checked = this.options.downloads.enableBatchDownload;
 
     // Parallax
     document.getElementById('parallaxEnabled').checked = this.options.parallax.enabled;

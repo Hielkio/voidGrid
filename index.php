@@ -1,9 +1,115 @@
+<?php
+// VoidGrid - Multi-source Media Gallery
+// Supports JSON files, directories, and mixed sources
+
+// Configuration
+$config = [
+    'sources' => [
+        'sources/africa.json',           // JSON file
+        'assets/images/portfolio',       // Directory with images
+        'assets/images/hq',             // Another directory
+        'sources/ocean-life-video.json' // JSON with videos
+    ],
+    'maxItems' => 50,  // Maximum items to load
+    'supportedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'avi']
+];
+
+// Function to scan directory for media files
+function scanDirectoryForMedia($directory, $basePath = '') {
+    $mediaFiles = [];
+
+    if (!is_dir($directory)) {
+        return $mediaFiles;
+    }
+
+    $files = scandir($directory);
+    $supportedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'avi'];
+
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+
+        $fullPath = $directory . '/' . $file;
+
+        if (is_dir($fullPath)) {
+            // Recursively scan subdirectories
+            $subMedia = scanDirectoryForMedia($fullPath, $basePath . $file . '/');
+            $mediaFiles = array_merge($mediaFiles, $subMedia);
+        } else {
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+            if (in_array($extension, $supportedExtensions)) {
+                $type = in_array($extension, ['mp4', 'webm', 'avi']) ? 'video' : 'image';
+                $url = $basePath . $file;
+
+                $mediaFiles[] = [
+                    'type' => $type,
+                    'url' => $url,
+                    'title' => ucfirst(pathinfo($file, PATHINFO_FILENAME)),
+                    'source' => 'directory:' . $directory
+                ];
+            }
+        }
+    }
+
+    return $mediaFiles;
+}
+
+// Function to load media from various sources
+function loadMediaFromSources($sources) {
+    $allMedia = [];
+
+    foreach ($sources as $source) {
+        if (is_dir($source)) {
+            // Source is a directory
+            $directoryMedia = scanDirectoryForMedia($source);
+            $allMedia = array_merge($allMedia, $directoryMedia);
+        } elseif (file_exists($source) && pathinfo($source, PATHINFO_EXTENSION) === 'json') {
+            // Source is a JSON file
+            $jsonContent = file_get_contents($source);
+            $jsonData = json_decode($jsonContent, true);
+
+            if ($jsonData && is_array($jsonData)) {
+                foreach ($jsonData as $item) {
+                    if (isset($item['image_url'])) {
+                        $allMedia[] = [
+                            'type' => 'image',
+                            'url' => $item['image_url'],
+                            'title' => $item['title'] ?? 'Image',
+                            'source' => 'json:' . $source
+                        ];
+                    } elseif (isset($item['video_url'])) {
+                        $allMedia[] = [
+                            'type' => 'video',
+                            'url' => $item['video_url'],
+                            'title' => $item['title'] ?? 'Video',
+                            'source' => 'json:' . $source
+                        ];
+                    }
+                }
+            }
+        }
+    }
+
+    // Shuffle and limit results
+    shuffle($allMedia);
+    return array_slice($allMedia, 0, 50); // Limit to 50 items
+}
+
+// Load media from all sources
+$mediaItems = loadMediaFromSources($config['sources']);
+
+// Convert to JSON for JavaScript
+$mediaItemsJson = json_encode($mediaItems);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoidGrid</title>
+    <title>VoidGrid - Multi-Source Media Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,6 +182,7 @@
             </label>
         </div>
 
+
         <!-- Background -->
         <div class="mb-4">
             <label class="block text-sm mb-1">Background Type:</label>
@@ -136,23 +243,24 @@
 
 <script src="script.js"></script>
 <script>
-  // Initialize the voidgrid with custom hover effects
-  // You can use remote sources or local downloaded media
+  // Initialize the voidgrid with PHP-generated media data
+  // Media is loaded server-side from multiple sources (JSON files and directories)
+  const phpMediaData = <?php echo $mediaItemsJson; ?>;
+
   new VoidGrid("#voidgridcontainer", {
-    // Option 1: Use remote sources (downloads media automatically)
-    sources: ['sources/africa.json', 'sources/ocean-life-video.json'],
-
-    // Option 2: Use local downloaded media (after running download)
-    // sources: ['sources/local-media.json'],
-
-    // Option 3: Use separate local files
-    // sources: ['sources/local-videos.json', 'sources/local-images.json'],
+    // Use PHP-generated media data instead of loading from sources
+    phpMediaData: phpMediaData,
 
     hover: {
       overlay: 'rgba(0, 0, 0, 0.8)', // Dark overlay
       descriptionPosition: 'bottom', // Descriptions at bottom
       showDescription: false, // Show only on hover
       zoomSpeed: 2.5 // Slow zoom effect
+    },
+
+    sound: {
+      gridMuted: true, // Videos muted in grid overview
+      lightboxEnabled: true // Sound enabled in lightbox
     }
   });
 </script>
