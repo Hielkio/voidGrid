@@ -128,7 +128,8 @@ class VoidGrid {
   }
 
   async loadImagesFromSources() {
-    this.mediaItems = []; // Array to hold both images and videos
+    let allVideos = []; // Array to hold all videos
+    let allImages = []; // Array to hold all images
     this.options.lightbox.mediaDescriptions = {};
 
     for (const source of this.options.sources) {
@@ -143,7 +144,7 @@ class VoidGrid {
         data.forEach((item, index) => {
           if (item.image_url) {
             // It's an image
-            this.mediaItems.push({
+            allImages.push({
               type: 'image',
               url: item.image_url,
               title: item.title || 'Image'
@@ -151,7 +152,7 @@ class VoidGrid {
             this.options.lightbox.mediaDescriptions[item.image_url] = item.title || 'Image';
           } else if (item.video_url) {
             // It's a video
-            this.mediaItems.push({
+            allVideos.push({
               type: 'video',
               url: item.video_url,
               title: item.title || 'Video'
@@ -164,12 +165,37 @@ class VoidGrid {
       }
     }
 
-    // Limit to first 20 items to prevent performance issues
-    if (this.mediaItems.length > 20) {
-      this.mediaItems = this.mediaItems.slice(0, 20);
+    // Construct final mediaItems array with guarantee of at least one video if videos exist
+    this.mediaItems = [];
+
+    // If videos are available, ensure at least one is included
+    if (allVideos.length > 0) {
+      // Add at least one video (randomly selected)
+      const randomVideoIndex = Math.floor(Math.random() * allVideos.length);
+      this.mediaItems.push(allVideos[randomVideoIndex]);
+
+      // Remove the selected video from the pool to avoid duplicates
+      allVideos.splice(randomVideoIndex, 1);
+
+      // Add remaining videos up to a reasonable limit
+      const remainingVideoSlots = Math.min(5, allVideos.length); // Max 5 videos
+      for (let i = 0; i < remainingVideoSlots; i++) {
+        this.mediaItems.push(allVideos[i]);
+      }
     }
 
-    // Fallback to default images if no media loaded
+    // Fill remaining slots with images
+    const remainingSlots = 20 - this.mediaItems.length;
+    const imagesToAdd = Math.min(remainingSlots, allImages.length);
+
+    // Shuffle images for variety
+    const shuffledImages = [...allImages].sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < imagesToAdd; i++) {
+      this.mediaItems.push(shuffledImages[i]);
+    }
+
+    // If no media was loaded at all, use fallback
     if (this.mediaItems.length === 0) {
       this.mediaItems = this.options.images.slice(0, 12).map(url => ({
         type: 'image',
