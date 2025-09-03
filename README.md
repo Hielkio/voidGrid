@@ -40,7 +40,12 @@ new VoidGrid("#myvoidgrid", {
   border: "border border-gray-300",
   sizeVariation: false,
   source: "sources/nature.json", // Load images from JSON file
-  gradientBorder: true, // Enable gradient borders based on image colors
+  hover: {
+    overlay: 'rgba(0, 0, 0, 0.8)', // Custom overlay color
+    descriptionPosition: 'bottom', // 'center', 'top', or 'bottom'
+    showDescription: true, // Show descriptions permanently
+    zoomSpeed: 3 // Slower zoom (3 seconds)
+  },
   lightbox: true
 });
 ```
@@ -69,8 +74,8 @@ The grid behavior can be customized via the `CONFIG` object in the JavaScript se
 - `gap`: Spacing between grid items (default: '2rem')
 - `sizeVariation`: Enable/disable random size variations for items (default: true)
 - `minRowHeight`: Minimum height for grid rows (default: '200px')
-- `gradientBorder`: Enable gradient borders based on image colors (default: false)
 - `lightbox`: Settings for the lightbox overlay and descriptions
+- `hover`: Hover effect configuration (see below)
 
 ## Images
 
@@ -96,28 +101,33 @@ new VoidGrid("#myvoidgrid", {
 
 The JSON files should contain an array of objects with `image_url` and `title` properties.
 
-### Gradient Borders
+### Hover Effects
 
-When `gradientBorder: true` is enabled, each image will automatically get a gradient border that matches the dominant colors in the image. The system uses an advanced color extraction algorithm that:
+The hover effects provide rich interactivity for your image grid:
 
-- Analyzes pixel data from the image using canvas
-- Identifies the most dominant color through color quantization
-- Creates vibrant, high-contrast gradients using HSL color space
-- Generates complementary and analogous colors for better visual appeal
+#### Hover Overlay
+- **Customizable Color**: Set any RGBA color for the overlay (default: `rgba(0, 0, 0, 0.7)`)
+- **Optional**: Set to `false` to disable the overlay entirely
+- **Smooth Transitions**: 300ms fade in/out animation
 
-**Performance Features:**
-- **Intelligent Caching**: Extracted colors are cached in memory and localStorage to avoid re-processing the same images
-- **Optimized Sampling**: Uses smart pixel sampling (up to 10k pixels) for better performance
-- **Batch Processing**: Colors are saved to localStorage periodically for persistence across page reloads
+#### Description Positioning
+- **Center**: Description appears in the center of the image (default)
+- **Top**: Description appears at the top of the image
+- **Bottom**: Description appears at the bottom of the image
+
+#### Permanent Descriptions
+- **Show Always**: Set `showDescription: true` to display descriptions permanently
+- **Hover Only**: Set `showDescription: false` to show descriptions only on hover (default)
+
+#### Zoom Effects
+- **Slow Zoom**: Customize zoom speed with `zoomSpeed` (default: 2 seconds)
+- **Smooth Animation**: CSS transitions provide buttery smooth zooming
+- **Scale Effect**: Images zoom to 110% on hover
 
 **Loading Experience:**
 - **Loading Spinners**: Each image shows a rotating loading spinner while the image loads
 - **Smooth Transitions**: Images fade in smoothly once loaded
 - **Error Handling**: Graceful handling of failed image loads
-
-**Important**: When gradient borders are enabled, the default border styling is automatically disabled to prevent visual conflicts. Only the gradient border will be visible.
-
-**Note**: Due to CORS (Cross-Origin Resource Sharing) restrictions, gradient borders work best with images from the same domain. For external images, a beautiful default gradient will be applied as a fallback.
 
 ### Using Custom Images
 

@@ -59,10 +59,15 @@
 
 <script src="script.js"></script>
 <script>
-  // Initialize the voidgrid with concerts source and gradient borders
+  // Initialize the voidgrid with custom hover effects
   new VoidGrid("#voidgridcontainer", {
-    source: 'sources/concerts.json',
-    gradientBorder: false
+    source: 'sources/africa.json',
+    hover: {
+      overlay: 'rgba(0, 0, 0, 0.8)', // Dark overlay
+      descriptionPosition: 'bottom', // Descriptions at bottom
+      showDescription: false, // Show only on hover
+      zoomSpeed: 2.5 // Slow zoom effect
+    }
   });
 </script>
 

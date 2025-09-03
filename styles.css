@@ -104,14 +104,23 @@ body {
 }
 .void-lightbox-arrow {
     position: absolute;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    font-size: 2rem;
     top: 50%;
+    width: 4rem;
+    height: 4rem;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
+    /* background-color: rgba(0, 0, 0, 0.5); */
+    background-color: rgba(255, 255, 255, 0.8);
+    /* color: white; */
+    color: black;
     padding: 1rem;
     cursor: pointer;
     z-index: 70;
-    border-radius: 9999px;
+    border-radius: 100%;
 }
 .void-lightbox-arrow.left {
     left: 2rem;
@@ -156,4 +165,10 @@ body {
 
 .voidgrid-image-loaded {
     opacity: 1;
+}
+
+/* Hover overlay styling */
+.voidgrid-hover-overlay {
+    z-index: 5;
+    pointer-events: none;
 }

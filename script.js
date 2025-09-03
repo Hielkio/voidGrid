@@ -6,7 +6,12 @@ const defaultOptions = {
   sizeVariation: true,
   // minRowHeight: '200px',
   source: null, // Path to JSON file for images
-  gradientBorder: false, // Enable gradient borders based on image colors
+  hover: {
+    overlay: 'rgba(0, 0, 0, 0.7)', // Hover overlay color (false to disable)
+    descriptionPosition: 'center', // 'center', 'top', or 'bottom'
+    showDescription: false, // Show description permanently in grid
+    zoomSpeed: 2, // Zoom speed in seconds (slower = more dramatic)
+  },
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -86,9 +91,6 @@ class VoidGrid {
     this.images = this.options.images;
     this.currentImageIndex = 0;
 
-    // Load color cache for better performance
-    this.loadColorCache();
-
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
     if (!this.toggleButton) {
@@ -143,172 +145,6 @@ class VoidGrid {
     this.createLightbox();
   }
 
-  /**
-   * Cache for storing extracted colors
-   */
-  colorCache = new Map();
-
-  /**
-   * Load cached colors from localStorage
-   */
-  loadColorCache() {
-    try {
-      const cached = localStorage.getItem('voidgrid-color-cache');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        // Convert back to Map
-        Object.entries(parsed).forEach(([key, value]) => {
-          this.colorCache.set(key, value);
-        });
-      }
-    } catch (error) {
-      console.warn('Failed to load color cache:', error);
-    }
-  }
-
-  /**
-   * Save cached colors to localStorage
-   */
-  saveColorCache() {
-    try {
-      const cacheObject = Object.fromEntries(this.colorCache);
-      localStorage.setItem('voidgrid-color-cache', JSON.stringify(cacheObject));
-    } catch (error) {
-      console.warn('Failed to save color cache:', error);
-    }
-  }
-
-  /**
-   * Extracts dominant colors from an image using canvas with improved algorithm
-   */
-  extractImageColor(img) {
-    return new Promise((resolve, reject) => {
-      // Check cache first
-      const cacheKey = img.src;
-      if (this.colorCache.has(cacheKey)) {
-        resolve(this.colorCache.get(cacheKey));
-        return;
-      }
-
-      try {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Use smaller canvas for better performance
-        const maxSize = 80;
-        const scale = Math.min(maxSize / img.naturalWidth, maxSize / img.naturalHeight, 1);
-        canvas.width = img.naturalWidth * scale;
-        canvas.height = img.naturalHeight * scale;
-
-        // Try to draw the image - this will fail for CORS-protected images
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-        // Improved color extraction using color quantization
-        const colorCounts = new Map();
-        const step = 4 * Math.max(1, Math.floor(imageData.length / 10000)); // Sample up to ~10k pixels
-
-        for (let i = 0; i < imageData.length; i += step) {
-          const r = imageData[i];
-          const g = imageData[i + 1];
-          const b = imageData[i + 2];
-          const alpha = imageData[i + 3];
-
-          // Skip transparent pixels
-          if (alpha < 128) continue;
-
-          // Skip very dark/light pixels
-          const brightness = (r + g + b) / 3;
-          if (brightness < 20 || brightness > 235) continue;
-
-          // Quantize colors to reduce variations
-          const qr = Math.floor(r / 16) * 16;
-          const qg = Math.floor(g / 16) * 16;
-          const qb = Math.floor(b / 16) * 16;
-          const key = `${qr},${qg},${qb}`;
-
-          colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
-        }
-
-        // Find the most dominant color
-        let dominantColor = { r: 128, g: 128, b: 128 }; // Default gray
-        let maxCount = 0;
-
-        for (const [key, count] of colorCounts) {
-          if (count > maxCount) {
-            const [r, g, b] = key.split(',').map(Number);
-            dominantColor = { r, g, b };
-            maxCount = count;
-          }
-        }
-
-        // Create more sophisticated gradient colors
-        const { r, g, b } = dominantColor;
-
-        // Generate a vibrant gradient based on the dominant color
-        const hsl = this.rgbToHsl(r, g, b);
-        const saturation = Math.max(0.4, hsl[1]); // Ensure good saturation
-        const lightness = Math.max(0.3, Math.min(0.7, hsl[2])); // Avoid extremes
-
-        // Create complementary colors for better gradient
-        const hue1 = hsl[0];
-        const hue2 = (hsl[0] + 60) % 360; // Analogous color
-        const hue3 = (hsl[0] + 180) % 360; // Complementary color
-
-        const brightColor = `hsl(${hue1}, ${saturation * 100}%, ${Math.min(85, lightness * 100 + 20)}%)`;
-        const darkColor = `hsl(${hue2}, ${Math.max(30, saturation * 100 - 20)}%, ${Math.max(15, lightness * 100 - 30)}%)`;
-        const accentColor = `hsl(${hue3}, ${saturation * 100}%, ${Math.max(25, lightness * 100 - 10)}%)`;
-
-        const result = {
-          bright: brightColor,
-          dark: darkColor,
-          accent: accentColor
-        };
-
-        // Cache the result
-        this.colorCache.set(cacheKey, result);
-
-        // Save to localStorage periodically
-        if (this.colorCache.size % 5 === 0) { // Save every 5 new colors
-          this.saveColorCache();
-        }
-
-        resolve(result);
-      } catch (error) {
-        // CORS error or other canvas drawing error
-        reject(error);
-      }
-    });
-  }
-
-  /**
-   * Convert RGB to HSL
-   */
-  rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0; // achromatic
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-
-    return [h * 360, s, l];
-  }
 
   /**
    * Generates the voidgrid items and adds them to the container.
@@ -335,9 +171,7 @@ class VoidGrid {
 
     for (let i = 0; i < this.images.length; i++) {
       const itemDiv = document.createElement('div');
-      // Only apply default border if gradient borders are not enabled
-      const borderClass = this.options.gradientBorder ? '' : this.options.border;
-      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer transform transition-transform duration-300 hover:scale-105 ${borderClass}`;
+      itemDiv.className = `voidgrid-item rounded-lg overflow-hidden relative shadow-lg group cursor-pointer ${this.options.border}`;
       itemDiv.setAttribute('data-index', i);
 
       let classNameModifier = '';
@@ -371,29 +205,17 @@ class VoidGrid {
       const img = document.createElement('img');
       img.src = imageUrl;
       img.alt = `VoidGrid image ${i + 1}`;
-      img.className = 'w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110 voidgrid-image-loading';
+
+      // Apply hover zoom speed
+      const zoomDuration = this.options.hover.zoomSpeed || 2;
+      img.className = `w-full h-full object-cover transition-transform duration-${Math.round(zoomDuration * 1000)} group-hover:scale-110 voidgrid-image-loading`;
 
       // Handle image load
-      img.onload = async () => {
+      img.onload = () => {
         // Hide spinner and show image
         spinner.style.display = 'none';
         img.classList.remove('voidgrid-image-loading');
         img.classList.add('voidgrid-image-loaded');
-
-        // Apply gradient border if enabled
-        if (this.options.gradientBorder) {
-          try {
-            const colors = await this.extractImageColor(img);
-            img.style.border = '8px solid transparent';
-            img.style.borderImage = `linear-gradient(135deg, ${colors.bright}, ${colors.accent}, ${colors.dark}) 1`;
-          } catch (error) {
-            // CORS error or other canvas issue - apply a default gradient instead
-            console.warn('Failed to extract colors for gradient border (likely CORS issue):', error);
-            // Apply a default attractive gradient as fallback
-            img.style.border = '8px solid transparent';
-            img.style.borderImage = `linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) 1`;
-          }
-        }
       };
 
       // Handle load errors
@@ -403,11 +225,38 @@ class VoidGrid {
         // Could add an error placeholder here
       };
 
-      itemDiv.innerHTML = `
-        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center">
-          <p class="text-lg font-bold">Project ${i + 1}</p>
-        </div>
-      `;
+      // Create hover overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'voidgrid-hover-overlay absolute inset-0 transition-opacity duration-300 flex p-4 text-center';
+
+      // Set overlay background color if enabled
+      if (this.options.hover.overlay) {
+        overlay.style.backgroundColor = this.options.hover.overlay;
+      }
+
+      // Set overlay position based on description position
+      if (this.options.hover.descriptionPosition === 'top') {
+        overlay.classList.add('items-start', 'justify-center', 'pt-8');
+      } else if (this.options.hover.descriptionPosition === 'bottom') {
+        overlay.classList.add('items-end', 'justify-center', 'pb-8');
+      } else {
+        overlay.classList.add('items-center', 'justify-center');
+      }
+
+      // Set initial opacity based on showDescription setting
+      if (this.options.hover.showDescription) {
+        overlay.classList.add('opacity-100');
+      } else {
+        overlay.classList.add('opacity-0', 'group-hover:opacity-100');
+      }
+
+      // Add description text
+      const description = document.createElement('p');
+      description.className = 'text-lg font-bold text-white';
+      description.textContent = `Project ${i + 1}`;
+      overlay.appendChild(description);
+
+      itemDiv.appendChild(overlay);
 
       // Append spinner and image to itemDiv
       itemDiv.appendChild(spinner);
