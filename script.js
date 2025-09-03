@@ -110,6 +110,7 @@ class VoidGrid {
 
     this.options = { ...defaultOptions, ...options };
     this.currentImageIndex = 0;
+    this.localMediaCache = new Map(); // Initialize cache
 
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
@@ -122,16 +123,21 @@ class VoidGrid {
     }
 
     // Use PHP-generated media data if available
-    if (this.options.phpMediaData) {
+    if (this.options.phpMediaData && this.options.phpMediaData.length > 0) {
+      console.log('Using PHP-generated media data:', this.options.phpMediaData.length, 'items');
+      console.log('First item:', this.options.phpMediaData[0]);
       this.mediaItems = this.options.phpMediaData;
       this.images = this.mediaItems.map(item => item.url);
+      console.log('Mapped URLs:', this.images);
       this.init();
     } else if (this.options.sources && this.options.sources.length > 0) {
       // Fallback to loading from sources (for backward compatibility)
+      console.log('Loading from sources:', this.options.sources);
       this.loadImagesFromSources().then(() => {
         this.init();
       });
     } else {
+      console.log('No media data available, using fallback');
       this.init();
     }
   }
@@ -424,9 +430,17 @@ class VoidGrid {
   }
 
   /**
-   * Gets the best available URL for a media item (local if available, remote otherwise).
+   * Gets the best available URL for a media item.
+   * For PHP-generated data, just return the URL directly.
+   * For dynamically loaded data, check cache for local versions.
    */
   getBestMediaUrl(item) {
+    // If we have PHP-generated data, just return the URL
+    if (this.options.phpMediaData) {
+      return item.url;
+    }
+
+    // For dynamically loaded data, check cache
     const cacheEntry = this.localMediaCache.get(item.url);
     if (cacheEntry && cacheEntry.localPath) {
       return cacheEntry.localPath;
@@ -581,6 +595,7 @@ class VoidGrid {
    * Generates the voidgrid items and adds them to the container.
    */
   generateVoidGrid() {
+    console.log('generateVoidGrid called with', this.mediaItems ? this.mediaItems.length : 0, 'media items');
     this.container.innerHTML = ''; // Clear the container
     this.container.style.gap = this.options.gap;
     this.container.style.padding = this.options.padding;

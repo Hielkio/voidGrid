@@ -6,9 +6,9 @@
 $config = [
     'sources' => [
         'sources/africa.json',           // JSON file
-        'assets/images/portfolio',       // Directory with images
-        'assets/images/hq',             // Another directory
-        'sources/ocean-life-video.json' // JSON with videos
+        'sources/ocean-life-video.json', // JSON with videos
+        '../assets/images/portfolio',    // Directory with images (relative to voidGrid)
+        '../assets/images/hq'            // Another directory (relative to voidGrid)
     ],
     'maxItems' => 50,  // Maximum items to load
     'supportedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'avi']
@@ -99,6 +99,14 @@ function loadMediaFromSources($sources) {
 
 // Load media from all sources
 $mediaItems = loadMediaFromSources($config['sources']);
+
+// Debug output
+echo "<!-- Debug: Loaded " . count($mediaItems) . " media items -->\n";
+if (count($mediaItems) > 0) {
+    echo "<!-- Debug: First item: " . json_encode($mediaItems[0]) . " -->\n";
+} else {
+    echo "<!-- Debug: No media items loaded from sources: " . implode(', ', $config['sources']) . " -->\n";
+}
 
 // Convert to JSON for JavaScript
 $mediaItemsJson = json_encode($mediaItems);
