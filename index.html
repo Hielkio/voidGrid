@@ -125,11 +125,17 @@
 <script src="script.js"></script>
 <script>
   // Initialize the voidgrid with custom hover effects
+  // You can use remote sources or local downloaded media
   new VoidGrid("#voidgridcontainer", {
-      sources: [
-        'sources/africa.json',
-        'sources/ocean-life-video.json'
-    ], // Array of JSON sources
+    // Option 1: Use remote sources (downloads media automatically)
+    sources: ['sources/africa.json', 'sources/ocean-life-video.json'],
+
+    // Option 2: Use local downloaded media (after running download)
+    // sources: ['sources/local-media.json'],
+
+    // Option 3: Use separate local files
+    // sources: ['sources/local-videos.json', 'sources/local-images.json'],
+
     hover: {
       overlay: 'rgba(0, 0, 0, 0.8)', // Dark overlay
       descriptionPosition: 'bottom', // Descriptions at bottom

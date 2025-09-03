@@ -182,6 +182,182 @@ class VoidGrid {
   }
 
   /**
+   * Sets up the media download manager.
+   */
+  setupMediaDownloadManager() {
+    // Create download button
+    this.createDownloadButton();
+  }
+
+  /**
+   * Creates a download button for batch downloading media.
+   */
+  createDownloadButton() {
+    const downloadBtn = document.createElement('button');
+    downloadBtn.id = 'mediaDownloadBtn';
+    downloadBtn.className = 'fixed top-4 left-4 z-50 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300';
+    downloadBtn.title = 'Download All Media';
+    downloadBtn.innerHTML = `
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+    `;
+
+    downloadBtn.addEventListener('click', () => this.downloadAllMedia());
+    document.body.appendChild(downloadBtn);
+  }
+
+  /**
+   * Downloads all media from current sources.
+   */
+  async downloadAllMedia() {
+    if (!this.mediaItems || this.mediaItems.length === 0) {
+      alert('No media items to download');
+      return;
+    }
+
+    const confirmDownload = confirm(`Download ${this.mediaItems.length} media files? This may take some time.`);
+    if (!confirmDownload) return;
+
+    const downloadBtn = document.getElementById('mediaDownloadBtn');
+    const originalHTML = downloadBtn.innerHTML;
+    downloadBtn.innerHTML = '<div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+    downloadBtn.disabled = true;
+
+    try {
+      let downloaded = 0;
+      const total = this.mediaItems.length;
+
+      for (const item of this.mediaItems) {
+        try {
+          await this.downloadMediaItem(item);
+          downloaded++;
+          console.log(`Downloaded ${downloaded}/${total}: ${item.title}`);
+        } catch (error) {
+          console.error(`Failed to download ${item.title}:`, error);
+        }
+      }
+
+      alert(`Downloaded ${downloaded}/${total} media files successfully!`);
+
+      // Generate local JSON files
+      this.generateLocalJSONFiles();
+
+    } catch (error) {
+      console.error('Batch download failed:', error);
+      alert('Some downloads failed. Check console for details.');
+    } finally {
+      downloadBtn.innerHTML = originalHTML;
+      downloadBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Downloads a single media item.
+   */
+  async downloadMediaItem(item) {
+    try {
+      const response = await fetch(item.url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create download link
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Generate filename with folder structure
+      const folder = item.type === 'video' ? 'videos' : 'images';
+      const extension = item.type === 'video' ? 'mp4' : 'jpg';
+      const filename = `${folder}/${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${extension}`;
+
+      link.download = filename;
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up object URL
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+
+    } catch (error) {
+      throw new Error(`Download failed for ${item.title}: ${error.message}`);
+    }
+  }
+
+  /**
+   * Generates local JSON files with organized folder structure.
+   */
+  generateLocalJSONFiles() {
+    const videos = this.mediaItems.filter(item => item.type === 'video');
+    const images = this.mediaItems.filter(item => item.type === 'image');
+
+    // Generate video JSON
+    if (videos.length > 0) {
+      const videoJSON = videos.map((video, index) => ({
+        id: index + 1,
+        video_url: `media/videos/${video.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp4`,
+        title: video.title,
+        type: 'video',
+        downloaded_at: new Date().toISOString()
+      }));
+
+      this.downloadJSONFile(videoJSON, 'local-videos.json');
+    }
+
+    // Generate image JSON
+    if (images.length > 0) {
+      const imageJSON = images.map((image, index) => ({
+        id: index + 1,
+        image_url: `media/images/${image.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`,
+        title: image.title,
+        type: 'image',
+        downloaded_at: new Date().toISOString()
+      }));
+
+      this.downloadJSONFile(imageJSON, 'local-images.json');
+    }
+
+    // Generate combined JSON
+    const combinedJSON = this.mediaItems.map((item, index) => ({
+      id: index + 1,
+      [item.type === 'video' ? 'video_url' : 'image_url']:
+        `media/${item.type === 'video' ? 'videos' : 'images'}/${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${item.type === 'video' ? 'mp4' : 'jpg'}`,
+      title: item.title,
+      type: item.type,
+      downloaded_at: new Date().toISOString()
+    }));
+
+    this.downloadJSONFile(combinedJSON, 'local-media.json');
+
+    console.log('Local JSON files generated. Place downloaded media files in the media/videos and media/images folders.');
+  }
+
+  /**
+   * Downloads a JSON file with the given data.
+   */
+  downloadJSONFile(data, filename) {
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => window.URL.revokeObjectURL(url), 100);
+  }
+
+  /**
    * Distributes videos and images evenly throughout the grid.
    */
   distributeMediaEvenly(videos, images, maxItems) {
@@ -246,6 +422,9 @@ class VoidGrid {
 
     // Setup video autoplay on user interaction
     this.setupVideoAutoplay();
+
+    // Setup media download manager
+    this.setupMediaDownloadManager();
   }
 
 
