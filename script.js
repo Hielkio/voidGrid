@@ -29,6 +29,10 @@ const defaultOptions = {
     showDescription: false, // Show description permanently in grid
     zoomSpeed: 2, // Zoom speed in seconds (slower = more dramatic)
   },
+  sound: {
+    gridMuted: true, // Videos muted in grid overview
+    lightboxEnabled: true // Sound enabled in lightbox
+  },
   images: [
     "https://images.alphacoders.com/605/thumb-1920-605592.png",
     "https://images.alphacoders.com/131/thumb-1920-1311951.jpg",
@@ -107,6 +111,7 @@ class VoidGrid {
     this.options = { ...defaultOptions, ...options };
     this.images = this.options.images;
     this.currentImageIndex = 0;
+    this.localMediaCache = new Map(); // Cache for local file existence checks
 
     // Find or create toggle button
     this.toggleButton = this.container.querySelector('.voidgrid-toggle') || this.container.parentElement.querySelector('.voidgrid-toggle');
@@ -358,6 +363,71 @@ class VoidGrid {
   }
 
   /**
+   * Sets up smart media loading with local file checking.
+   */
+  setupSmartMediaLoading() {
+    // Pre-check local files for current media items
+    this.checkLocalFilesAvailability();
+  }
+
+  /**
+   * Checks which media files are available locally.
+   */
+  async checkLocalFilesAvailability() {
+    if (!this.mediaItems) return;
+
+    for (const item of this.mediaItems) {
+      const localPath = this.getLocalPath(item);
+      if (localPath) {
+        const isAvailable = await this.checkLocalFile(localPath);
+        this.localMediaCache.set(item.url, {
+          localPath: isAvailable ? localPath : null,
+          checked: true
+        });
+      }
+    }
+  }
+
+  /**
+   * Checks if a local file exists by trying to load it.
+   */
+  async checkLocalFile(localPath) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = localPath;
+
+      // Timeout after 3 seconds
+      setTimeout(() => resolve(false), 3000);
+    });
+  }
+
+  /**
+   * Gets the local path for a media item.
+   */
+  getLocalPath(item) {
+    if (!item.title) return null;
+
+    const folder = item.type === 'video' ? 'videos' : 'images';
+    const extension = item.type === 'video' ? 'mp4' : 'jpg';
+    const filename = `${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${extension}`;
+
+    return `media/${folder}/${filename}`;
+  }
+
+  /**
+   * Gets the best available URL for a media item (local if available, remote otherwise).
+   */
+  getBestMediaUrl(item) {
+    const cacheEntry = this.localMediaCache.get(item.url);
+    if (cacheEntry && cacheEntry.localPath) {
+      return cacheEntry.localPath;
+    }
+    return item.url;
+  }
+
+  /**
    * Distributes videos and images evenly throughout the grid.
    */
   distributeMediaEvenly(videos, images, maxItems) {
@@ -394,6 +464,76 @@ class VoidGrid {
     return allSelectedItems.slice(0, maxItems);
   }
 
+  /**
+   * Sets up automatic download of visible items.
+   */
+  setupAutoDownloadVisible() {
+    let autoDownloadTriggered = false;
+
+    const triggerAutoDownload = () => {
+      if (autoDownloadTriggered) return;
+      autoDownloadTriggered = true;
+
+      // Wait a bit for the page to fully load
+      setTimeout(() => {
+        this.downloadVisibleItems();
+      }, 2000);
+    };
+
+    // Trigger on first user interaction
+    const events = ['click', 'touchstart', 'keydown', 'scroll'];
+    events.forEach(event => {
+      document.addEventListener(event, triggerAutoDownload, { once: true });
+    });
+  }
+
+  /**
+   * Downloads media items that are currently visible in the viewport.
+   */
+  async downloadVisibleItems() {
+    if (!this.mediaItems || this.mediaItems.length === 0) return;
+
+    const visibleItems = this.getVisibleItems();
+    if (visibleItems.length === 0) return;
+
+    console.log(`Auto-downloading ${visibleItems.length} visible items...`);
+
+    for (const item of visibleItems) {
+      // Check if local version already exists
+      const localPath = this.getLocalPath(item);
+      if (localPath) {
+        const isAvailable = await this.checkLocalFile(localPath);
+        if (!isAvailable) {
+          try {
+            await this.downloadMediaItem(item);
+            console.log(`Auto-downloaded: ${item.title}`);
+          } catch (error) {
+            console.log(`Failed to auto-download ${item.title}:`, error.message);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets items that are currently visible in the viewport.
+   */
+  getVisibleItems() {
+    const items = this.container.querySelectorAll('.voidgrid-item');
+    const visibleItems = [];
+
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isVisible && this.mediaItems[index]) {
+        visibleItems.push(this.mediaItems[index]);
+      }
+    });
+
+    return visibleItems;
+  }
+
   init() {
     // Apply background settings
     this.applyBackground();
@@ -422,6 +562,12 @@ class VoidGrid {
 
     // Setup video autoplay on user interaction
     this.setupVideoAutoplay();
+
+    // Setup smart media loading
+    this.setupSmartMediaLoading();
+
+    // Setup automatic download of visible items
+    this.setupAutoDownloadVisible();
 
     // Setup media download manager
     this.setupMediaDownloadManager();
@@ -492,9 +638,9 @@ class VoidGrid {
       if (mediaItem.type === 'video') {
         // Create video element
         mediaElement = document.createElement('video');
-        mediaElement.src = mediaItem.url;
+        mediaElement.src = this.getBestMediaUrl(mediaItem); // Use smart loading
         mediaElement.alt = `VoidGrid video ${i + 1}`;
-        mediaElement.muted = true; // Required for autoplay
+        mediaElement.muted = this.options.sound.gridMuted; // Use sound settings
         mediaElement.autoplay = true;
         mediaElement.loop = true;
         mediaElement.playsInline = true; // For mobile
@@ -530,7 +676,7 @@ class VoidGrid {
       } else {
         // Create image element
         mediaElement = document.createElement('img');
-        mediaElement.src = mediaItem.url;
+        mediaElement.src = this.getBestMediaUrl(mediaItem); // Use smart loading
         mediaElement.alt = `VoidGrid image ${i + 1}`;
 
         // Apply hover zoom speed
@@ -816,6 +962,10 @@ class VoidGrid {
    * Applies settings from the panel to the options.
    */
   applySettingsFromPanel() {
+    // Sound settings
+    this.options.sound.gridMuted = document.getElementById('gridMuted').checked;
+    this.options.sound.lightboxEnabled = document.getElementById('lightboxSoundEnabled').checked;
+
     // Parallax
     this.options.parallax.enabled = document.getElementById('parallaxEnabled').checked;
     this.options.parallax.speed = parseFloat(document.getElementById('parallaxSpeed').value);
@@ -861,6 +1011,10 @@ class VoidGrid {
    * Sets the panel values based on current options.
    */
   setPanelValues() {
+    // Sound settings
+    document.getElementById('gridMuted').checked = this.options.sound.gridMuted;
+    document.getElementById('lightboxSoundEnabled').checked = this.options.sound.lightboxEnabled;
+
     // Parallax
     document.getElementById('parallaxEnabled').checked = this.options.parallax.enabled;
     document.getElementById('parallaxSpeed').value = this.options.parallax.speed;
@@ -967,11 +1121,11 @@ class VoidGrid {
     if (currentMedia.type === 'video') {
       // Create video element for lightbox
       const video = document.createElement('video');
-      video.src = currentMedia.url;
+      video.src = this.getBestMediaUrl(currentMedia); // Use smart loading
       video.controls = true;
       video.autoplay = true;
       video.loop = true;
-      video.muted = false; // Allow sound in lightbox
+      video.muted = !this.options.sound.lightboxEnabled; // Use sound settings
       video.className = 'void-lightbox-video';
       video.style.width = '100%';
       video.style.height = '100%';
